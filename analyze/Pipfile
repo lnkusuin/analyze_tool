@@ -1,0 +1,51 @@
+[scripts]
+start = "python src/app.py"
+format = "black src tests"
+lint-fix = "autopep8 src --recursive --in-place --pep8-passes 2000 --verbose"
+lint-check = "pylint src"
+test = "python -m pytest -p no:warnings tests"
+coverage = "pytest --cov=src tests/ --cov-report html"
+
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = "*"
+pytest-cov = "*"
+pylint = "*"
+pytest-mock = "*"
+autopep8 = "*"
+
+[packages]
+pandas = "*"
+google-api-python-client = "*"
+google-auth-httplib2 = "*"
+google-auth-oauthlib = "*"
+python-dotenv = "*"
+black = "==19.3b0"
+jpholiday = "*"
+xmltodict = "*"
+sshtunnel = "*"
+pymysql = "*"
+aiohttp = "*"
+quart = "*"
+hypercorn = "*"
+pytest-mock = "*"
+beautifulsoup4 = "*"
+simplejson = "*"
+python-rapidjson = "*"
+fbprophet = "*"
+matplotlib = "*"
+plotly = "*"
+geopy = "*"
+gensim = "*"
+janome = "*"
+spacy = "*"
+cython = "*"
+joblib = "*"
+fire = "*"
+
+[requires]
+python_version = "3.7"

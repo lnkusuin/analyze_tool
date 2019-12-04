@@ -1,0 +1,17 @@
+/target
+**/*.rs.bk
+
+__pycache__/
+
+# intellij idea
+*.log
+*.iml
+*.ipr
+*.iws
+.idea
+
+# mac
+.DS_Store
+
+
+*.twbr
