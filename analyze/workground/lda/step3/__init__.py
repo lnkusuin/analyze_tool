@@ -52,8 +52,6 @@ def run(path):
                 # ゴミデータがあるので削除
                 nouns = [n for n in nouns if n != " " and n != "️"]
 
-                print(nouns)
-
                 if len(nouns):
                     new_dictionary = corpora.Dictionary([nouns])
                     dictionary.merge_with(new_dictionary)
@@ -71,7 +69,7 @@ def run(path):
 
         lda = gensim.models.ldamodel.LdaModel(
             corpus=corpus,
-            num_topics=10,
+            num_topics=5,
             id2word=dictionary
         )
 
