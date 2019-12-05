@@ -7,7 +7,7 @@ stop_words = set(list(STOP_WORDS) + list(set(
     - ] ; ( ) ﾛ ー ? ! - ﾊ https co :// maru kl 
     笑 私 様 プ ん 。 次 ❤ gt lt rt あなた ww ω jp www ♀ ☺ 
     今日 昨日 明日 д id 笑笑 ＼  、 『 』 「 」 【  ⭐ ・ “ ● ￥ 
-    ○ 】 ゚ URL RT → 
+    ○ 】 ゚ URL RT → 前日 ☆ てる 00 って ” 
     0 1 2 3 4 5 6 7 8 9 
     
     あそこ
