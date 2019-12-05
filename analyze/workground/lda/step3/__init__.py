@@ -14,21 +14,18 @@ from stopword import stop_words
 logger = get_logger(__name__)
 
 
-def check(_docs):
-    is_noun = False
-    is_verb = False
-    for _doc in _docs:
-        if is_noun and is_verb:
-            return True
+def extract(_docs):
 
+    result = []
+    for _doc in _docs:
         if _doc["tag"] == "名詞-普通名詞-一般" or \
                 _doc["tag"] == "名詞-普通名詞-サ変可能" or \
                 _doc["tag"] == "名詞-固有名詞-一般" or \
-                _doc["tag"] == "名詞-固有名詞-地名-国":
-            is_noun = True
+                _doc["tag"] == "名詞-固有名詞-地名-国" or \
+                _doc["pos"] == "VERB":
+            result.append(_doc.get("lemma", ""))
 
-        if _doc["pos"] == "VERB":
-            is_verb = True
+    return result
 
 
 def run(path):
@@ -41,6 +38,7 @@ def run(path):
         logger.error("指定のファイルパスではjson形式のファイルは見つかりませんでした。  {}".format(path))
         sys.exit(1)
 
+    ff = open("tmp.txt", "w")
     nouns = []
     for p in glob.glob(path):
         logger.info("次のファイルを読み込みます {}".format(os.path.abspath(p)))
@@ -48,14 +46,14 @@ def run(path):
             for line in f.readlines():
                 docs = json.loads(line.replace("\n", ""))
 
-                # from pprint import pprint
-                # pprint(docs)
+                #json.dump(docs, ff, ensure_ascii=False, indent=2)
 
                 # 名詞と動詞が各一つ以上入っているものに限定
-                if not check(docs):
+                words = extract(docs)
+                if not len(words):
                     continue
 
-                nouns = [doc.get("lemma", "") for doc in docs if doc.get("lemma", "") not in stop_words]
+                nouns = [word for word in words if word not in stop_words]
                 # ゴミデータがあるので削除
                 nouns = [n for n in nouns if n != " " and n != "️"]
 
