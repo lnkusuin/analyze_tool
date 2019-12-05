@@ -97,7 +97,6 @@ def run(path, topic_id=5):
         logger.info("モデルを保存しています。")
         lda.save(get_save_train_data_path("Model"))
         # test(lda, test_corpus=corpus)
-        # show(lda, corpus, dictionary)
     else:
         logger.info("トピック解析対象のデータが存在しませんでした。")
 
