@@ -3,6 +3,7 @@ import sys
 import json
 import time
 import glob
+from pathlib import Path
 
 import gensim
 from gensim import corpora
@@ -26,6 +27,11 @@ def extract(_docs):
     return result
 
 
+def get_save_train_data_path(path):
+    base_path = Path(os.path.dirname(__file__))
+    return str(base_path / "t-{}".format(str(path)))
+
+
 def run(path, topic_id=5):
     """トピックモデルの構築"""
     start_time = time.perf_counter()
@@ -36,15 +42,12 @@ def run(path, topic_id=5):
         logger.error("指定のファイルパスではjson形式のファイルは見つかりませんでした。  {}".format(path))
         sys.exit(1)
 
-    ff = open("tmp.txt", "w")
     nouns = []
     for p in glob.glob(path):
         logger.info("次のファイルを読み込みます {}".format(os.path.abspath(p)))
         with open(os.path.abspath(p)) as f:
             for line in f.readlines():
                 docs = json.loads(line.replace("\n", ""))
-
-                #json.dump(docs, ff, ensure_ascii=False, indent=2)
 
                 # 名詞と動詞が各一つ以上入っているものに限定
                 words = extract(docs)
@@ -65,8 +68,8 @@ def run(path, topic_id=5):
     if len(nouns):
         logger.info("トピックモデルを構築します。")
         # モデルの作成
-        dictionary.save_as_text("./DICT_FILE_NAME")
-        corpora.MmCorpus.serialize("./CORPUS_FILE_NAME", corpus)
+        dictionary.save_as_text(get_save_train_data_path("dictionary.txt"))
+        corpora.MmCorpus.serialize(get_save_train_data_path("CORPUS_FILE_NAME.bin"), corpus)
 
         print(dictionary)
 
@@ -79,7 +82,7 @@ def run(path, topic_id=5):
         logger.info("トピックモデルの構築が完了しました。")
         import pprint
         pprint.pprint(lda.show_topics())
-        # lda.save("LDA_MODEL_FILE_NAME")
+        lda.save(get_save_train_data_path("LDA_MODEL_FILE_NAME"))
 
         logger.info("最終結果をファイルに保存します。")
         data = []
@@ -90,7 +93,7 @@ def run(path, topic_id=5):
                 data.append([item[0], score.replace('"', ""), label.replace('"', "")])
 
         df = pd.DataFrame(data)
-        df.to_csv("res.csv", index=False, header=["topic", 'score', 'label'])
+        df.to_csv(get_save_train_data_path("res.csv"), index=False, header=["topic", 'score', 'label'])
     else:
         logger.info("トピック解析対象のデータが存在しませんでした。")
 
