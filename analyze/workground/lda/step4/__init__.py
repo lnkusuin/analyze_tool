@@ -51,13 +51,16 @@ def output_to_csv(model):
 def run(
     corpus_path="../step3/t-CORPUS_FILE_NAME",
     dictionary_path="../step3/t-DICTIONARY",
-    model_path="../step3/t-Model"
+    model_path="../step3/t-Model",
+    font_path=""
 ):
     """可視化・モデルの評価を行う"""
     logger.info("トピックモデルの評価・可視化を行います。")
 
     logger.info("コーパスを読み込みます。")
     corpus = MmCorpus(get_path(corpus_path))
+    tfidf = gensim.models.TfidfModel(corpus)
+    corpus = tfidf[corpus]
     logger.info("コーパスの読み込みが完了しました。")
 
     logger.info("辞書を読み込みます。")
@@ -73,7 +76,7 @@ def run(
     logger.info("CSVファイルへの出力が完了しました。")
 
     logger.info("ワードクラウドを作成します")
-    fig, axs = plt.subplots(ncols=2, nrows=math.ceil(model.num_topics/2), figsize=(16,20))
+    fig, axs = plt.subplots(ncols=2, nrows=math.ceil(model.num_topics/2), figsize=(10,40))
     axs = axs.flatten()
 
     def color_func(word, font_size, position, orientation, random_state, font_path):
@@ -83,14 +86,15 @@ def run(
 
         x = dict(model.show_topic(t, 30))
         im = WordCloud(
-            font_path="/System/Library/Fonts/ヒラギノ明朝 ProN.ttc",
+            font_path=font_path,
             background_color='black',
             color_func=color_func,
             max_words=4000,
             width=300, height=300,
-            random_state=0
+            random_state=0,
+            scale=2
         ).generate_from_frequencies(x)
-        axs[i].imshow(im.recolor(colormap= 'Paired_r' , random_state=244), alpha=0.98)
+        axs[i].imshow(im.recolor(colormap='Paired_r', random_state=244), alpha=0.98)
         axs[i].axis('off')
         axs[i].set_title('Topic '+str(t))
 

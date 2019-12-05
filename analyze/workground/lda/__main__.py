@@ -11,7 +11,7 @@ from lda.step3 import run as step3
 from lda.step4 import run as step4
 
 
-def main(path: str = "", step_id: int = 0, n_jobs=4, batch_size=1000, topic_id=5):
+def main(path: str = "", step_id: int = 0, n_jobs=4, batch_size=1000, topic_id=5, font_path=""):
     """コマンドラインツール"""
 
     # FIXME 抽象化するかも サブコマンド管理でいいかもしれない
@@ -28,7 +28,7 @@ def main(path: str = "", step_id: int = 0, n_jobs=4, batch_size=1000, topic_id=5
         step3(path, topic_id=topic_id)
     # 可視化
     elif step_id == 4:
-        step4()
+        step4(font_path=font_path)
     else:
         pass
         # TODO すべて実行
