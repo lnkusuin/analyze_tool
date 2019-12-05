@@ -43,7 +43,6 @@ def process_nlp(batch_id, texts, output_dir, size):
 
 def run(path, n_jobs=4, batch_size=1000):
     """ 自然言語解析"""
-    start_time = time.perf_counter()
     logger.info("辞書の作成を行います。")
 
     if not Path(path).exists():
@@ -56,7 +55,10 @@ def run(path, n_jobs=4, batch_size=1000):
     output_dir = "./output"
     p = Path(os.path.dirname(__file__)) / output_dir
 
-    if p.exists():
+    # 解析結果格納フォルダは毎回初期化される仕様
+    if not p.exists():
+        p.mkdir()
+    else:
         shutil.rmtree(p, ignore_errors=True)
         p.mkdir()
 
