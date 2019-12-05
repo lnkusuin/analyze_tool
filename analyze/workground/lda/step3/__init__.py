@@ -23,11 +23,12 @@ def run(path):
         logger.info("次のファイルを読み込みます {}".format(os.path.abspath(p)))
         with open(os.path.abspath(p)) as f:
             for line in f.readlines():
+                # TODO 名詞と動詞が各一つ以上入っているものに限定
                 nouns = line.replace("\n", "").split(",")
                 nouns = [word for word in nouns if word not in stop_words]
 
                 if len(nouns):
-                    new_dictionary = corpora.Dictionary([line.split(",")])
+                    new_dictionary = corpora.Dictionary([nouns])
                     dictionary.merge_with(new_dictionary)
                     corpus.extend([dictionary.doc2bow(nouns)])
 
