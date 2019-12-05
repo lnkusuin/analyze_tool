@@ -4,9 +4,11 @@ stop_words = set(list(STOP_WORDS) + list(set(
     """
     a b c d e f g h i j k l m n o p q r s t u v w x y z
     の ⁉ / # : ) ♪ ❄ ⛄ ）@ _ " ✨ ! ❓ ～ . & ！ ╱ _ \ [ 
-    - ] ; ( ) ﾛ ー ? ! - ﾊ https co :// maru kl
-    笑 私 様 プ ん 。次 ❤ gt lt rt あなた ww ω jp www 。♀ ☺
-    今日 昨日 明日 д id 笑笑 ＼ 
+    - ] ; ( ) ﾛ ー ? ! - ﾊ https co :// maru kl 
+    笑 私 様 プ ん 。 次 ❤ gt lt rt あなた ww ω jp www ♀ ☺ 
+    今日 昨日 明日 д id 笑笑 ＼  、 『 』 「 」 【  ⭐ ・ “ ● ￥ 
+    ○ 】 
+    0 1 2 3 4 5 6 7 8 9 
     
     あそこ
     あそこ
