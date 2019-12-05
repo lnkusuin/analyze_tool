@@ -41,7 +41,7 @@ def process_nlp(batch_id, texts, output_dir, size):
     logger.info("Saved {} texts to {}.txt = ファイル総数:{} 単一の処理時間: {}".format(len(texts), batch_id, size, time.perf_counter() - start_time))
 
 
-def run(path):
+def run(path, n_jobs=4, batch_size=1000):
     """ 自然言語解析"""
     start_time = time.perf_counter()
     logger.info("辞書の作成を行います。")
@@ -49,7 +49,6 @@ def run(path):
     if not Path(path).exists():
         logger.error("指定のパスが見つかりませんでした。 {}".format(path))
         sys.exit(1)
-
 
     df = pd.read_csv(path)
     df = df.dropna(how='all')
@@ -61,8 +60,6 @@ def run(path):
         shutil.rmtree(p, ignore_errors=True)
         p.mkdir()
 
-    batch_size = 1000
-    n_jobs = 4
     partitions = minibatch(docs, size=batch_size)
     executor = Parallel(n_jobs=n_jobs, verbose=10, backend="multiprocessing", prefer="processes")
     do = delayed(partial(process_nlp, size=len(docs)/batch_size))
