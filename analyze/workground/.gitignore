@@ -1,3 +1,4 @@
 **/local-Makefile
 **/output/*.txt
-*   .csv
+*.json
+*.csv
