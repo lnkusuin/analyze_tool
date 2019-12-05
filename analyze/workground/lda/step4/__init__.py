@@ -96,7 +96,7 @@ def run(
         ).generate_from_frequencies(x)
         axs[i].imshow(im.recolor(colormap='Paired_r', random_state=244), alpha=0.98)
         axs[i].axis('off')
-        axs[i].set_title('Topic '+str(t))
+        axs[i].set_title('Topic '+str(t + 1))
 
     # vis
     plt.tight_layout()
