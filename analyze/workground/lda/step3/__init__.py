@@ -21,7 +21,10 @@ def check(_docs):
         if is_noun and is_verb:
             return True
 
-        if _doc["pos"] == "NOUN":
+        if _doc["tag"] == "名詞-普通名詞-一般" or \
+                _doc["tag"] == "名詞-普通名詞-サ変可能" or \
+                _doc["tag"] == "名詞-固有名詞-一般" or \
+                _doc["tag"] == "名詞-固有名詞-地名-国":
             is_noun = True
 
         if _doc["pos"] == "VERB":
@@ -44,6 +47,10 @@ def run(path):
         with open(os.path.abspath(p)) as f:
             for line in f.readlines():
                 docs = json.loads(line.replace("\n", ""))
+
+                # from pprint import pprint
+                # pprint(docs)
+
                 # 名詞と動詞が各一つ以上入っているものに限定
                 if not check(docs):
                     continue
@@ -62,8 +69,8 @@ def run(path):
     if len(nouns):
         logger.info("トピックモデルを構築します。")
         # モデルの作成
-        dictionary.save("./DICT_FILE_NAME")
-        corpora.MmCorpus.serialize("./CORPUS_FILE_NAME", corpus)
+        # dictionary.save("./DICT_FILE_NAME")
+        # corpora.MmCorpus.serialize("./CORPUS_FILE_NAME", corpus)
 
         print(dictionary)
 
@@ -76,7 +83,7 @@ def run(path):
         logger.info("トピックモデルの構築が完了しました。")
         import pprint
         pprint.pprint(lda.show_topics())
-        lda.save("LDA_MODEL_FILE_NAME")
+        # lda.save("LDA_MODEL_FILE_NAME")
 
         logger.info("最終結果をファイルに保存します。")
         data = []
