@@ -2,3 +2,6 @@
 **/output/*.txt
 *.json
 *.csv
+*.png
+*.txt
+*.html
