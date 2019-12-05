@@ -15,13 +15,14 @@ logger = get_logger(__name__)
 
 
 def extract(_docs):
+    """名詞のみ抽出"""
     result = []
     for _doc in _docs:
         if _doc["tag"] == "名詞-普通名詞-一般" or \
                 _doc["tag"] == "名詞-普通名詞-サ変可能" or \
                 _doc["tag"] == "名詞-固有名詞-一般" or \
-                _doc["tag"] == "名詞-固有名詞-地名-国" or \
-                _doc["pos"] == "VERB":
+                _doc["tag"] == "名詞-固有名詞-地名-国":
+
             result.append(_doc.get("lemma", ""))
     return result
 
