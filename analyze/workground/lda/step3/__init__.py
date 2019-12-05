@@ -14,18 +14,16 @@ from stopword import stop_words
 logger = get_logger(__name__)
 
 
-def check(_docs):
-    is_noun = False
-    is_verb = False
+def extract(_docs):
+    result = []
     for _doc in _docs:
-        if is_noun and is_verb:
-            return True
-
-        if _doc["tag"] == "名詞-普通名詞-一般" or _doc["tag"] == "名詞-普通名詞-サ変可能":
-            is_noun = True
-
-        if _doc["pos"] == "VERB":
-            is_verb = True
+        if _doc["tag"] == "名詞-普通名詞-一般" or \
+                _doc["tag"] == "名詞-普通名詞-サ変可能" or \
+                _doc["tag"] == "名詞-固有名詞-一般" or \
+                _doc["tag"] == "名詞-固有名詞-地名-国" or \
+                _doc["pos"] == "VERB":
+            result.append(_doc.get("lemma", ""))
+    return result
 
 
 def run(path, topic_id=5):
@@ -38,18 +36,22 @@ def run(path, topic_id=5):
         logger.error("指定のファイルパスではjson形式のファイルは見つかりませんでした。  {}".format(path))
         sys.exit(1)
 
+    ff = open("tmp.txt", "w")
     nouns = []
     for p in glob.glob(path):
         logger.info("次のファイルを読み込みます {}".format(os.path.abspath(p)))
         with open(os.path.abspath(p)) as f:
             for line in f.readlines():
                 docs = json.loads(line.replace("\n", ""))
-                # 名詞と動詞が各一つ以上入っているものに限定
 
-                if not check(docs):
+                #json.dump(docs, ff, ensure_ascii=False, indent=2)
+
+                # 名詞と動詞が各一つ以上入っているものに限定
+                words = extract(docs)
+                if not len(words):
                     continue
 
-                nouns = [doc.get("lemma", "") for doc in docs if doc.get("lemma", "") not in stop_words]
+                nouns = [word for word in words if word not in stop_words]
                 # ゴミデータがあるので削除
                 nouns = [n for n in nouns if n != " " and n != "️"]
 
@@ -77,7 +79,7 @@ def run(path, topic_id=5):
         logger.info("トピックモデルの構築が完了しました。")
         import pprint
         pprint.pprint(lda.show_topics())
-        lda.save("LDA_MODEL_FILE_NAME")
+        # lda.save("LDA_MODEL_FILE_NAME")
 
         logger.info("最終結果をファイルに保存します。")
         data = []
