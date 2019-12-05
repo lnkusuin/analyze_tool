@@ -59,8 +59,8 @@ def run(
 
     logger.info("コーパスを読み込みます。")
     corpus = MmCorpus(get_path(corpus_path))
-    tfidf = gensim.models.TfidfModel(corpus)
-    corpus = tfidf[corpus]
+    # tfidf = gensim.models.TfidfModel(corpus)
+    # corpus = tfidf[corpus]
     logger.info("コーパスの読み込みが完了しました。")
 
     logger.info("辞書を読み込みます。")
