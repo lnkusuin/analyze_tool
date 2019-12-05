@@ -1,14 +1,16 @@
 import time
 import os
+import sys
 from pathlib import Path
 from functools import partial
 import shutil
+import json
 
 from joblib import Parallel, delayed
 from spacy.util import minibatch
 import pandas as pd
 
-from common import get_logger, logger_count
+from common import get_logger
 from nlp import nlp
 
 logger = get_logger(__name__)
@@ -16,23 +18,24 @@ logger = get_logger(__name__)
 
 def process_nlp(batch_id, texts, output_dir, size):
     start_time = time.perf_counter()
-    out_path = Path(os.path.dirname(__file__)) / output_dir / ("%d.txt" % batch_id)
+    out_path = Path(os.path.dirname(__file__)) / output_dir / ("%d.json" % batch_id)
     if out_path.exists():
         return None
 
     logger.info("Processing batch {}".format(batch_id))
     with out_path.open("w", encoding="utf8") as f:
         for doc in nlp().pipe(texts, disable=['ner']):
-            words = ",".join(
-                [
-                    token.lemma_ for token in doc
-                    if token.pos_ == "PROPN"
-                       or token.pos_ == "ADJ"
-                       or token.pos_ == "VERB"
-                       or token.pos_ == "ADV"
-                ])
-
-            f.write(words)
+            words = [{
+                "text": token.text,
+                "lemma": token.lemma_,
+                "pos": token.pos_,
+                "tag": token.tag_,
+                "dep": token.dep_,
+                "shape": token.shape_,
+                "is_alpha": token.is_alpha,
+                "is_stop": token.is_stop
+            } for token in doc]
+            f.write(json.dumps(words))
             f.write("\n")
 
     logger.info("Saved {} texts to {}.txt = ファイル総数:{} 単一の処理時間: {}".format(len(texts), batch_id, size, time.perf_counter() - start_time))
@@ -41,8 +44,12 @@ def process_nlp(batch_id, texts, output_dir, size):
 def run(path):
     """ 自然言語解析"""
     start_time = time.perf_counter()
-    _logger_count = logger_count(start_time)
     logger.info("辞書の作成を行います。")
+
+    if not Path(path).exists():
+        logger.error("指定のパスが見つかりませんでした。 {}".format(path))
+        sys.exit(1)
+
 
     df = pd.read_csv(path)
     df = df.dropna(how='all')
