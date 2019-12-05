@@ -46,6 +46,8 @@ spacy = "*"
 cython = "*"
 joblib = "*"
 fire = "*"
+wordcloud = "*"
+pyldavis = "*"
 
 [requires]
 python_version = "3.7"
