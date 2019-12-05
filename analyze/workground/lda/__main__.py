@@ -18,7 +18,7 @@ def main(path: str = "", step_id: int = 0, n_jobs=4, batch_size=1000):
         step1(path)
     elif step_id == 2:
         step2(path, n_jobs=n_jobs, batch_size=batch_size)
-    elif step_id == 2:
+    elif step_id == 3:
         step3(path)
     else:
         pass
