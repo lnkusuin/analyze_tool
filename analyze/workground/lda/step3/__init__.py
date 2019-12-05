@@ -21,14 +21,14 @@ def check(_docs):
         if is_noun and is_verb:
             return True
 
-        if _doc["pos"] == "NOUN":
+        if _doc["tag"] == "名詞-普通名詞-一般" or _doc["tag"] == "名詞-普通名詞-サ変可能":
             is_noun = True
 
         if _doc["pos"] == "VERB":
             is_verb = True
 
 
-def run(path):
+def run(path, topic_id=5):
     """トピックモデルの構築"""
     start_time = time.perf_counter()
     dictionary = corpora.Dictionary([])
@@ -45,6 +45,7 @@ def run(path):
             for line in f.readlines():
                 docs = json.loads(line.replace("\n", ""))
                 # 名詞と動詞が各一つ以上入っているものに限定
+
                 if not check(docs):
                     continue
 
@@ -62,14 +63,14 @@ def run(path):
     if len(nouns):
         logger.info("トピックモデルを構築します。")
         # モデルの作成
-        dictionary.save("./DICT_FILE_NAME")
+        dictionary.save_as_text("./DICT_FILE_NAME")
         corpora.MmCorpus.serialize("./CORPUS_FILE_NAME", corpus)
 
         print(dictionary)
 
         lda = gensim.models.ldamodel.LdaModel(
             corpus=corpus,
-            num_topics=5,
+            num_topics=topic_id,
             id2word=dictionary
         )
 
