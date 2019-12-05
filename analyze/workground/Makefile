@@ -3,6 +3,7 @@ STEP2_PATH = ""
 STEP2_N_JOBS=4
 STEP2_BATCH_SIZE=1000
 STEP3_PATH = ""
+STEP3_TOPIC_ID = 20
 
 run-all:
 	pipenv run python lda
@@ -14,4 +15,7 @@ run-step2:
 	pipenv run python -m lda --step_id=2 --path $(STEP2_PATH) --n_jobs $(STEP2_N_JOBS) --batch_size $(STEP2_BATCH_SIZE)
 
 run-step3:
-	pipenv run python -m lda --step_id=3 --path $(STEP3_PATH)
+	pipenv run python -m lda --step_id=3 --path $(STEP3_PATH) --topic_id $(STEP3_TOPIC_ID)
+
+run-step4:
+	pipenv run python -m lda --step_id=4

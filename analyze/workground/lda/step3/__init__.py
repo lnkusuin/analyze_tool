@@ -7,7 +7,6 @@ from pathlib import Path
 
 import gensim
 from gensim import corpora
-import pandas as pd
 
 from common import get_logger
 from stopword import stop_words
@@ -32,19 +31,28 @@ def get_save_train_data_path(path):
     return str(base_path / "t-{}".format(str(path)))
 
 
+def test(lda_model, test_corpus):
+    import numpy as np
+
+    N = sum(count for doc in test_corpus for id, count in doc)
+    print("N: ",N)
+
+    perplexity = np.exp2(-lda_model.log_perplexity(test_corpus))
+    print("perplexity:", perplexity)
+
+
 def run(path, topic_id=5):
     """トピックモデルの構築"""
     start_time = time.perf_counter()
     dictionary = corpora.Dictionary([])
-    corpus = []
 
     if not len(glob.glob(path)):
-        logger.error("指定のファイルパスではjson形式のファイルは見つかりませんでした。  {}".format(path))
+        logger.error("指定のファイルパスではjson形式のファイルは見つかりませんでした。  {} \nパスを確認してください。".format(path))
         sys.exit(1)
 
-    nouns = []
+    nouns_list = []
     for p in glob.glob(path):
-        logger.info("次のファイルを読み込みます {}".format(os.path.abspath(p)))
+        logger.info("次のファイルから辞書を作成します。 {}".format(os.path.abspath(p)))
         with open(os.path.abspath(p)) as f:
             for line in f.readlines():
                 docs = json.loads(line.replace("\n", ""))
@@ -61,15 +69,20 @@ def run(path, topic_id=5):
                 if len(nouns):
                     new_dictionary = corpora.Dictionary([nouns])
                     dictionary.merge_with(new_dictionary)
-                    corpus.extend([dictionary.doc2bow(nouns)])
+                    nouns_list.append(nouns)
 
+    dictionary.filter_extremes(no_below=3, no_above=0.8)
     logger.info("辞書の作成が完了しました。")
 
-    if len(nouns):
+    logger.info("コーパスの作成を開始します。")
+    corpus = [dictionary.doc2bow(t) for t in nouns_list]
+    logger.info("コーパスの作成を完了しました。")
+
+    if len(nouns_list):
         logger.info("トピックモデルを構築します。")
         # モデルの作成
-        dictionary.save_as_text(get_save_train_data_path("dictionary.txt"))
-        corpora.MmCorpus.serialize(get_save_train_data_path("CORPUS_FILE_NAME.bin"), corpus)
+        dictionary.save(get_save_train_data_path("DICTIONARY"))
+        corpora.MmCorpus.serialize(get_save_train_data_path("CORPUS_FILE_NAME"), corpus)
 
         print(dictionary)
 
@@ -80,21 +93,13 @@ def run(path, topic_id=5):
         )
 
         logger.info("トピックモデルの構築が完了しました。")
-        import pprint
-        pprint.pprint(lda.show_topics())
-        lda.save(get_save_train_data_path("LDA_MODEL_FILE_NAME"))
 
-        logger.info("最終結果をファイルに保存します。")
-        data = []
-        for item in lda.show_topics():
-            for _item in item[1].split('+'):
-                score = _item.split("*")[0]
-                label = _item.split("*")[1]
-                data.append([item[0], score.replace('"', ""), label.replace('"', "")])
-
-        df = pd.DataFrame(data)
-        df.to_csv(get_save_train_data_path("res.csv"), index=False, header=["topic", 'score', 'label'])
+        logger.info("モデルを保存しています。")
+        lda.save(get_save_train_data_path("Model"))
+        # test(lda, test_corpus=corpus)
+        # show(lda, corpus, dictionary)
     else:
         logger.info("トピック解析対象のデータが存在しませんでした。")
 
     logger.info("処理時間: {}".format(time.perf_counter()-start_time))
+
