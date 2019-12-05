@@ -11,6 +11,7 @@ from lda.step3 import run as step3
 
 
 def main(path: str = "", step_id: int = 0, n_jobs=4, batch_size=1000):
+    # FIXME 抽象化するかも
     step_list = {1: step1, 2: step2, 3: step3}
 
     if step_id == 1:
