@@ -22,8 +22,8 @@ def open_json(path):
         items = json.load(f)
         for item in items:
             # リツイート以外
-            if not item.get("item", "").startswith("RT "):
-                yield item.get("item", "")
+            if not item.get("text", "").startswith("RT "):
+                yield item.get("text", "")
 
 
 def open_csv(path):
@@ -31,8 +31,8 @@ def open_csv(path):
         reader = csv.DictReader(f)
         for item in reader:
             # リツイート以外
-            if not item.get("item", "").startswith("RT "):
-                yield item.get("item", "")
+            if not item.get("text", "").startswith("RT "):
+                yield item.get("text", "")
 
 
 def run(path, type="csv"):

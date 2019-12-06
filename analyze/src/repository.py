@@ -15,7 +15,7 @@ class FileRepository:
         if not path.exists():
             path.mkdir()
 
-        path = path / str(name + "_" + str(datetime.now().time()))
+        path = path / str(str(name) + "_" + str(datetime.now().time()))
         if not path.exists():
             path.mkdir()
 

@@ -4,7 +4,7 @@ include .env
 export
 
 run-step1:
-	$(PIPENV_PIPFILE) pipenv run python . step1 --path $(STEP1_PATH)
+	$(PIPENV_PIPFILE) pipenv run python . step1 --path $(STEP1_PATH) --type=json
 
 run-step2:
 	$(PIPENV_PIPFILE) pipenv run python . step2 --path $(STEP2_PATH) --n_jobs $(STEP2_N_JOBS) --batch_size $(STEP2_BATCH_SIZE)
