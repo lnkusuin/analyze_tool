@@ -1,7 +1,10 @@
 import math
 import os
+import pickle
 from pathlib import Path
 
+from tqdm import tqdm
+import numpy as np
 import pandas as pd
 import gensim
 from gensim.corpora.mmcorpus import MmCorpus
@@ -48,14 +51,14 @@ def output_to_csv(model):
     df.to_csv(get_path("res.csv"), index=False, header=["topic", 'score', 'label'])
 
 
-def run(
-    corpus_path="../step3/t-CORPUS_FILE_NAME",
-    dictionary_path="../step3/t-DICTIONARY",
-    model_path="../step3/t-Model",
-    font_path=""
-):
-    """可視化・モデルの評価を行う"""
-    logger.info("トピックモデルの評価・可視化を行います。")
+def load_state(text_path, corpus_path, dictionary_path, model_path):
+    """状態の復元"""
+
+    logger.info("テキストを読み込みます")
+    with open(get_path(text_path), "rb") as f:
+        texts = pickle.load(f)
+
+    logger.info("テキストの読み込みが完了しました。")
 
     logger.info("コーパスを読み込みます。")
     corpus = MmCorpus(get_path(corpus_path))
@@ -74,6 +77,59 @@ def run(
     logger.info("CSVファイルに結果を出力します。'")
     output_to_csv(model)
     logger.info("CSVファイルへの出力が完了しました。")
+
+    return texts, corpus, dictionary, model
+
+
+def evaluation(texts, corpus, dictionary):
+    start = 2
+    limit = 50
+    step = 2
+
+    coherence_vals = []
+    perplexity_vals = []
+
+    for n_topic in tqdm(range(start, limit, step)):
+        lda_model = gensim.models.ldamodel.LdaModel(corpus=corpus, id2word=dictionary, num_topics=n_topic, random_state=0)
+        perplexity_vals.append(np.exp2(-lda_model.log_perplexity(corpus)))
+        coherence_model_lda = gensim.models.CoherenceModel(model=lda_model, texts=texts, dictionary=dictionary, coherence='c_v')
+        coherence_vals.append(coherence_model_lda.get_coherence())
+
+    x = range(start, limit, step)
+
+    fig, ax1 = plt.subplots(figsize=(12, 5))
+
+    c1 = 'darkturquoise'
+    ax1.plot(x, coherence_vals, 'o-', color=c1)
+    ax1.set_xlabel('Num Topics')
+    ax1.set_ylabel('Coherence', color=c1)
+    ax1.tick_params('y', colors=c1)
+
+    c2 = 'slategray'
+    ax2 = ax1.twinx()
+    ax2.plot(x, perplexity_vals, 'o-', color=c2)
+    ax2.set_ylabel('Perplexity', color=c2)
+    ax2.tick_params('y', colors=c2)
+
+    ax1.set_xticks(x)
+    fig.tight_layout()
+    plt.savefig(get_path('evaluation.png'))
+
+
+def run(
+    texts_path="../step3/t-TEXTS",
+    corpus_path="../step3/t-CORPUS_FILE_NAME",
+    dictionary_path="../step3/t-DICTIONARY",
+    model_path="../step3/t-Model",
+    font_path=""
+):
+    """可視化・モデルの評価を行う"""
+    logger.info("トピックモデルの評価・可視化を行います。")
+
+    texts, corpus, dictionary, model = load_state(texts_path, corpus_path, dictionary_path, model_path)
+
+    # FIXME 計算に時間がかかる
+    evaluation(texts, corpus, dictionary)
 
     logger.info("ワードクラウドを作成します")
     fig, axs = plt.subplots(ncols=2, nrows=math.ceil(model.num_topics/2), figsize=(10,40))

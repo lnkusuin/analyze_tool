@@ -49,6 +49,7 @@ fire = "*"
 wordcloud = "*"
 pyldavis = "*"
 tableauserverclient = "*"
+tqdm = "*"
 
 [requires]
 python_version = "3.7"

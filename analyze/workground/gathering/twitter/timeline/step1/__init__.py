@@ -20,7 +20,7 @@ def run(screen_name: str):
 
     logger.info("{}のタイムライン情報を取得します。".format(screen_name))
     twitter_repository = TwitterRepository()
-    time_lines = twitter_repository.get_user_timeline_by_user_id_all(**{
+    time_lines = twitter_repository.get_user_timeline_by_user_id_all(20, **{
         "screen_name": screen_name
     })
 

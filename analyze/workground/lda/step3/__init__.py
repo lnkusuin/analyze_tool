@@ -3,8 +3,10 @@ import sys
 import json
 import time
 import glob
+import pickle
 from pathlib import Path
 
+import pandas as pd
 import gensim
 from gensim import corpora
 
@@ -72,6 +74,9 @@ def run(path, topic_id=5):
                     new_dictionary = corpora.Dictionary([nouns])
                     dictionary.merge_with(new_dictionary)
                     nouns_list.append(nouns)
+
+    with open(get_save_train_data_path("TEXTS"), "wb") as f:
+        pickle.dump(nouns_list, f)
 
     dictionary.filter_extremes(no_below=3, no_above=0.8)
     logger.info("辞書の作成が完了しました。")

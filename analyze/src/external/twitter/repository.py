@@ -92,7 +92,7 @@ class TwitterRepository:
                 sleep(10)
                 self.session = self.get_session()
 
-    def get_user_timeline_by_user_id_all(self, **params):
+    def get_user_timeline_by_user_id_all(self, max_count, **params):
 
         count = 0
         max_id = ""
@@ -113,7 +113,7 @@ class TwitterRepository:
             results.extend(ret)
             count = count + 1
 
-            if count > 10:
+            if count > max_count:
                 break
 
         return results
