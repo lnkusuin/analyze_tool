@@ -35,7 +35,7 @@ def process_nlp(batch_id, texts, output_dir, size):
                 "is_alpha": token.is_alpha,
                 "is_stop": token.is_stop
             } for token in doc]
-            f.write(json.dumps(words))
+            f.write(json.dumps(words, ensure_ascii=False))
             f.write("\n")
 
     logger.info("Saved {} texts to {}.txt = ファイル総数:{} 単一の処理時間: {}".format(len(texts), batch_id, size, time.perf_counter() - start_time))

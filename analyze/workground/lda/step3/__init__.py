@@ -21,7 +21,8 @@ def extract(_docs):
         if _doc["tag"] == "名詞-普通名詞-一般" or \
                 _doc["tag"] == "名詞-普通名詞-サ変可能" or \
                 _doc["tag"] == "名詞-固有名詞-一般" or \
-                _doc["tag"] == "名詞-固有名詞-地名-国":
+                _doc["tag"] == "名詞-固有名詞-地名-国" or \
+                _doc["pos"] == "VERB":
 
             result.append(_doc.get("lemma", ""))
     return result
@@ -83,6 +84,7 @@ def run(path, topic_id=5):
         logger.info("トピックモデルを構築します。")
         # モデルの作成
         dictionary.save(get_save_train_data_path("DICTIONARY"))
+        dictionary.save_as_text(get_save_train_data_path("DICTIONARY.txt"))
         corpora.MmCorpus.serialize(get_save_train_data_path("CORPUS_FILE_NAME"), corpus)
 
         print(dictionary)
