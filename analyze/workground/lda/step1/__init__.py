@@ -1,4 +1,7 @@
+import os
 import csv
+import json
+from pathlib import Path
 
 import pandas as pd
 
@@ -9,26 +12,56 @@ from nlp import CleanText
 logger = get_logger(__name__)
 
 
-def run(path):
-    """テキストデータの前処理"""
+def get_base_path(name:str, path="output"):
+    base_path = Path(os.path.dirname(__file__)).resolve()
+    return str(base_path / path / name)
 
-    logger.info("CSVファイルを読み込みます。")
 
-    count = 0
-    texts = []
+def open_json(path):
     with open(path) as f:
-        logger.info("CSVファイルの読み込みが完了しました。")
+        items = json.load(f)
+        for item in items:
+            # リツイート以外
+            if not item.get("item", "").startswith("RT "):
+                yield item.get("item", "")
+
+
+def open_csv(path):
+    with open(path) as f:
         reader = csv.DictReader(f)
         for item in reader:
-            # リツイート省く
-            if not item.get("text", "").startswith("RT "):
-                texts.append(CleanText(item.get("text", "")).to_lower().to_adjust_line_code().to_remove_url().to_adjust_zero_number().to_adjust_mention().to_remove_symbol().text)
-                count += 1
-            if count % 10000 == 0:
-                logger.info(count)
+            # リツイート以外
+            if not item.get("item", "").startswith("RT "):
+                yield item.get("item", "")
 
-    path = './adjust.csv'
+
+def run(path, type="csv"):
+    """テキストデータの前処理"""
+    logger.info("テキストの前処理を開始します。")
+    count = 0
+    texts = []
+    _open = None
+
+    if type == "json":
+        _open = open_json
+        logger.info("jsonファイルを読み込みます。")
+    elif type == "csv":
+        _open = open_csv
+        logger.info("CSVファイルを読み込みます。")
+
+    # リツイートが省かれている
+    for text in _open(path):
+        texts.append(CleanText(text).to_lower().to_adjust_line_code().to_remove_url().to_adjust_zero_number().to_adjust_mention().to_remove_symbol().text)
+        count += 1
+
+        if count % 10000 == 0:
+            logger.info(count)
+
     print(len(texts))
+
+    path = get_base_path("adjust.csv")
     pd.DataFrame(texts).to_csv(path, index=False, header=["text"])
+
+    logger.info("テキストの前処理を完了しました。")
 
     return path
