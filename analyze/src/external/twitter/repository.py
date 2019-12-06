@@ -74,10 +74,10 @@ class TwitterRepository:
 
         return self._after_response(res)
 
-    def get_user_timeline_by_user_id(self, user_id, max_id: str=""):
+    def get_user_timeline_by_user_id(self, max_id: str="", **params):
         while True:
             try:
-                params = {"user_id": user_id, "count": 200}
+                params = {**params, "count": 200}
                 if max_id:
                     params["max_id"] = max_id
 
@@ -92,14 +92,14 @@ class TwitterRepository:
                 sleep(10)
                 self.session = self.get_session()
 
-    def get_user_timeline_by_user_id_all(self, user_id):
+    def get_user_timeline_by_user_id_all(self, **params):
 
         count = 0
         max_id = ""
         results = []
         while True:
             logger.info("リクエスト{}回目".format(count + 1))
-            ret, status = self.get_user_timeline_by_user_id(user_id, max_id)
+            ret, status = self.get_user_timeline_by_user_id(max_id, **params)
 
             if status == 429:
                 logger.info("API制限となりました。15分秒遅延します。")

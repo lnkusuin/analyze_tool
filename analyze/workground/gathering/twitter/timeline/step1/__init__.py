@@ -15,12 +15,14 @@ def get_path(path="output"):
     return str(base_path / path)
 
 
-def run(screen_id: str):
+def run(screen_name: str):
     """タイムライン情報取得コマンド"""
 
-    logger.info("{}のタイムライン情報を取得します。".format(screen_id))
+    logger.info("{}のタイムライン情報を取得します。".format(screen_name))
     twitter_repository = TwitterRepository()
-    time_lines = twitter_repository.get_user_timeline_by_user_id_all(screen_id)
+    time_lines = twitter_repository.get_user_timeline_by_user_id_all(**{
+        "screen_name": screen_name
+    })
 
-    FileRepository.save_json(get_path(), str(screen_id), time_lines)
-    logger.info("{}のタイムライン情報を取得しました。".format(screen_id))
+    FileRepository.save_json(get_path(), str(screen_name), time_lines)
+    logger.info("{}のタイムライン情報を取得しました。".format(screen_name))
