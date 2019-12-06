@@ -48,6 +48,7 @@ joblib = "*"
 fire = "*"
 wordcloud = "*"
 pyldavis = "*"
+tableauserverclient = "*"
 
 [requires]
 python_version = "3.7"
