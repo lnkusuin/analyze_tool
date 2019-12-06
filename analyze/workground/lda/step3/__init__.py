@@ -9,7 +9,7 @@ import gensim
 from gensim import corpora
 
 from common import get_logger
-from stopword import stop_words
+from nlp.stopword import stop_words
 
 logger = get_logger(__name__)
 
