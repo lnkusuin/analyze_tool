@@ -3,6 +3,12 @@ include ../../../Makefile
 include .env
 export
 
+run-all:
+	@make run-step1
+	@make run-step2
+	@make run-step3
+	@make run-step4
+
 run-step1:
 	$(PIPENV_PIPFILE) pipenv run python . step1 --path $(STEP1_PATH) --type=json
 
