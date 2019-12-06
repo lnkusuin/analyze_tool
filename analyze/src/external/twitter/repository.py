@@ -50,6 +50,8 @@ class TwitterRepository:
 
     def _after_response(self, res):
         if res.status_code == 401:
+            logger.info(res.text)
+
             return [], res.status_code
 
         if res.status_code != 200:
