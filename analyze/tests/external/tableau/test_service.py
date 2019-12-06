@@ -2,7 +2,7 @@ from unittest import mock
 
 from tableauserverclient.server import ProjectItem, WorkbookItem
 
-from context.tableau.service import TableauTwitterService
+from external.tableau.service import TableauTwitterService
 
 
 class TestTableauService:
