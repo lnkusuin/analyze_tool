@@ -22,11 +22,7 @@ def open_json(path):
         items = json.load(f)
         for item in items:
             # リツイート以外
-            text = item.get("text", "")
-            if not text.startswith("RT "):
-                yield text
-
-
+            yield item.get("text", "")
 
 def open_csv(path):
     with open(path) as f:
@@ -54,7 +50,7 @@ def run(path, type="csv"):
 
     # リツイートが省かれている
     for text in _open(path):
-        texts.append(CleanText(text).to_lower().to_adjust_line_code().to_remove_url().to_adjust_zero_number().to_adjust_mention().to_remove_hash_tag().to_remove_symbol().text)
+        texts.append(CleanText(text).to_lower().to_adjust_line_code().to_remove_url().to_adjust_zero_number().to_adjust_mention().to_remove_symbol().text)
         count += 1
 
         if count % 10000 == 0:

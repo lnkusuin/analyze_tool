@@ -98,7 +98,17 @@ def create_viz(model, corpus, dictionary):
 
 def evaluation(n_topic, texts, corpus, dictionary, font_path):
 
-    model = gensim.models.ldamodel.LdaModel(corpus=corpus, id2word=dictionary, num_topics=n_topic, alpha="auto", random_state=0)
+    passes = 20
+    iterations = 400
+
+    model = gensim.models.ldamodel.LdaModel(
+        corpus=corpus,
+        id2word=dictionary,
+        num_topics=n_topic,
+        random_state=0,
+        iterations=iterations,
+        passes=passes
+    )
     perplexity_vals = np.exp2(-model.log_perplexity(corpus))
 
     create_word_cloud(model, font_path)
@@ -107,11 +117,12 @@ def evaluation(n_topic, texts, corpus, dictionary, font_path):
 
     return model, n_topic, texts, corpus, dictionary, perplexity_vals
 
+
 def evaluation2(model, corpus, dictionary):
     create_viz(model, corpus, dictionary)
 
 
-def save_z(x_topics: list, coherence_vals: list, perplexity_vals: list):
+def save_z(x_topics: list, perplexity_vals: list, coherence_vals: list):
     fig, ax1 = plt.subplots(figsize=(12, 5))
 
     c1 = 'darkturquoise'
@@ -185,9 +196,9 @@ def run(path, font_path):
 
     logger.info("コーパスの作成を開始します。")
     corpus = [dictionary.doc2bow(t) for t in texts]
-    tfidf = gensim.models.TfidfModel(corpus)
-    tfidf.save('model.tfidf')
-    corpus = tfidf[corpus]
+    # tfidf = gensim.models.TfidfModel(corpus)
+    # tfidf.save('model.tfidf')
+    # corpus = tfidf[corpus]
 
     logger.info("コーパスの作成を完了しました。")
     dictionary.save(get_save_train_data_path("DICTIONARY"))

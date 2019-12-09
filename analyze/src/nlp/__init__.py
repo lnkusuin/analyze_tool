@@ -8,7 +8,7 @@ URL = re.compile(r"(https?|ftp)(:\/\/[-_\.!~*\'()a-zA-Z0-9;\/?:\@&=\+\$,%#]+)")
 ZERO_NUMBER = re.compile(r'[0-9]+')
 ADJUST_MENTION = re.compile(r'@([A-Za-z0-9_]+)')
 HASH_TAG = re.compile(r"#(\w+)")
-REMOVE_SYMBOL_Z = re.compile("[!-/:-@[-`{-~]")
+# REMOVE_SYMBOL_Z = re.compile("[!-/:-@[-`{-~]")
 REMOVE_SYMBOL_H = re.compile(r'[︰-＠]')
 
 
@@ -36,7 +36,7 @@ class CleanText:
         return self
 
     def to_remove_url(self):
-        self._text = re.sub(URL, "", self._text)
+        self._text = re.sub(URL, " ", self._text)
         return self
 
     def to_adjust_zero_number(self):
@@ -44,16 +44,17 @@ class CleanText:
         return self
 
     def to_adjust_mention(self):
-        self._text = re.sub(ADJUST_MENTION, "", self._text)
+        self._text = re.sub(ADJUST_MENTION, " ", self._text)
         return self
 
     def to_remove_hash_tag(self):
-        self._text = re.sub(HASH_TAG, "", self._text)
+        self._text = re.sub(HASH_TAG, " ", self._text)
         return self
 
     def to_remove_symbol(self):
-        self._text = re.sub(REMOVE_SYMBOL_H, "", self._text)
-        self._text = re.sub(REMOVE_SYMBOL_Z, "", self._text)
+        self._text = re.sub(REMOVE_SYMBOL_H, " ", self._text)
+        self._text = self._text.replace("RT ", " ").replace("rt ", " ").replace(":", " ")
+        # self._text = re.sub(REMOVE_SYMBOL_Z, "", self._text)
 
         return self
 
