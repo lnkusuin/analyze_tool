@@ -196,7 +196,7 @@ def run(path, font_path):
 
     if len(texts):
         start = 2
-        limit = 50
+        limit = 30
         step = 2
 
         executor = Parallel(n_jobs=-1, verbose=10, backend="multiprocessing", prefer="processes")
