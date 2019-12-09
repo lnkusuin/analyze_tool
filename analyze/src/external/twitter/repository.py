@@ -153,14 +153,14 @@ class TwitterRepository:
             logger.info("リクエスト{}回目".format(count + 1))
             ret, status = self.get_tweets_by_word(next_results, **params)
 
-            statuses = ret['statuses']
-            search_metadata = ret['search_metadata']
-            next_results = search_metadata["next_results"]
-
             if status == 429:
                 logger.info("API制限となりました。15分秒遅延します。")
                 sleep((60 * 15) + 30)
                 continue
+
+            statuses = ret['statuses']
+            search_metadata = ret['search_metadata']
+            next_results = search_metadata["next_results"]
 
             if not len(statuses):
                 break

@@ -20,7 +20,7 @@ def run(word: str):
 
     logger.info("{}のワードを検索します。 ".format(word))
     twitter_repository = TwitterRepository()
-    tweets = twitter_repository.get_all_tweets_by_word(30, **{
+    tweets = twitter_repository.get_all_tweets_by_word(500, **{
         "q": word
     })
 
