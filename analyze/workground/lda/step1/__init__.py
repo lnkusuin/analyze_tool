@@ -28,11 +28,8 @@ def open_csv(path):
     with open(path) as f:
         reader = csv.DictReader(f)
         for item in reader:
-            # リツイート以外
             text = item.get("text", "")
-            if not text.startswith("RT "):
-                yield text
-
+            yield text
 
 def run(path, type="csv"):
     """テキストデータの前処理"""
