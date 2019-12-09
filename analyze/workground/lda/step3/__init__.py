@@ -103,6 +103,8 @@ def evaluation(n_topic, texts, corpus, dictionary, font_path):
 
     create_word_cloud(model, font_path)
 
+    model.save(get_save_train_data_path("Model-{}".format(model.num_topics)))
+
     return model, n_topic, texts, corpus, dictionary, perplexity_vals
 
 def evaluation2(model, corpus, dictionary):

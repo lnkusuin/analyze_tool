@@ -10,6 +10,7 @@ from step1 import run as step1
 from step2 import run as step2
 from step3 import run as step3
 from step4 import run as step4
+from step5 import run as step5
 
 fire.Fire()
 

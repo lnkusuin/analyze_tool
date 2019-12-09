@@ -20,3 +20,6 @@ run-step3:
 
 #run-step4:
 #	$(PIPENV_PIPFILE) pipenv run python . step4 --font_path $(STEP4_FONT_PATH)
+
+run-step5:
+	$(PIPENV_PIPFILE) pipenv run python . step5 --docs $(DOCS)
