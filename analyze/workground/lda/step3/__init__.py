@@ -101,7 +101,7 @@ def evaluation(n_topic, texts, corpus, dictionary, font_path):
     passes = 20
     iterations = 400
 
-    model = gensim.models.ldamodel.LdaModel(
+    model = gensim.models.ldamulticore.LdaMulticore(
         corpus=corpus,
         id2word=dictionary,
         num_topics=n_topic,
@@ -210,22 +210,16 @@ def run(path, font_path):
         limit = 30
         step = 2
 
-        executor = Parallel(n_jobs=-1, verbose=10, backend="multiprocessing", prefer="processes")
-
         # トピックごとにモデル算出(並列処理)
         logger.info("トピックモデルの構築とワードクラウドの作成を行います。")
-        d = []
-        for n_topic in range(start, limit, step):
-            d.append(delayed(evaluation)(n_topic, texts, corpus, dictionary, font_path))
-        logger.info("トピックモデルの構築とワードクラウドの作成を行いました。")
-
-        # トピックごとにcoherenceを算出(直列処理) 図の作成￿
-        logger.info("トピック毎にcoherenceを算出し、評価グラフとして保存します。")
         x_topics = []
         perplexity_vals_list = []
-        coherence_vals_list =[]
+        coherence_vals_list = []
         d2 = []
-        for model, n_topic, texts, corpus, dictionary, perplexity_vals in executor(d):
+
+        for n_topic in range(start, limit, step):
+            model, n_topic, texts, corpus, dictionary, perplexity_vals = evaluation(n_topic, texts, corpus, dictionary, font_path)
+
             coherence_model_lda = gensim.models.CoherenceModel(model=model, texts=texts, dictionary=dictionary, coherence='c_v')
             x_topics.append(n_topic)
             perplexity_vals_list.append(perplexity_vals)
@@ -234,9 +228,9 @@ def run(path, font_path):
             save_z(x_topics, perplexity_vals_list, coherence_vals_list)
 
             d2.append(delayed(evaluation2)(model, corpus, dictionary))
-        logger.info("トピック毎にcoherenceを算出し、評価グラフとして保存処理を完了します。")
 
         logger.info("t-sneを作成します。")
+        executor = Parallel(n_jobs=-1, verbose=10, backend="multiprocessing", prefer="processes")
         executor(d2)
         logger.info("t-sneを作成しました。")
 
