@@ -22,8 +22,10 @@ def open_json(path):
         items = json.load(f)
         for item in items:
             # リツイート以外
-            if not item.get("text", "").startswith("RT "):
-                yield item.get("text", "")
+            text = item.get("text", "")
+            if not text.startswith("RT "):
+                yield text
+
 
 
 def open_csv(path):
@@ -31,8 +33,9 @@ def open_csv(path):
         reader = csv.DictReader(f)
         for item in reader:
             # リツイート以外
-            if not item.get("text", "").startswith("RT "):
-                yield item.get("text", "")
+            text = item.get("text", "")
+            if not text.startswith("RT "):
+                yield text
 
 
 def run(path, type="csv"):
@@ -60,7 +63,7 @@ def run(path, type="csv"):
     print(len(texts))
 
     path = get_base_path("adjust.csv")
-    pd.DataFrame(texts).to_csv(path, index=False, header=["text"])
+    pd.DataFrame(texts).to_csv(path, index=False, header=["text"], encoding="utf-8")
 
     logger.info("テキストの前処理を完了しました。")
 

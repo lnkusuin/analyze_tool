@@ -16,7 +16,7 @@ run-step2:
 	$(PIPENV_PIPFILE) pipenv run python . step2 --path $(STEP2_PATH) --n_jobs $(STEP2_N_JOBS) --batch_size $(STEP2_BATCH_SIZE)
 
 run-step3:
-	$(PIPENV_PIPFILE) pipenv run python . step3 --path $(STEP3_PATH) --topic_id $(STEP3_TOPIC_ID)
+	$(PIPENV_PIPFILE) OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES pipenv run python . step3 --path $(STEP3_PATH) --font_path $(FONT_PATH)
 
-run-step4:
-	$(PIPENV_PIPFILE) pipenv run python . step4 --font_path $(STEP4_FONT_PATH)
+#run-step4:
+#	$(PIPENV_PIPFILE) pipenv run python . step4 --font_path $(STEP4_FONT_PATH)

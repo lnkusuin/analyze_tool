@@ -49,7 +49,7 @@ def run(path, n_jobs=4, batch_size=1000):
         logger.error("指定のパスが見つかりませんでした。 {}".format(path))
         sys.exit(1)
 
-    df = pd.read_csv(path)
+    df = pd.read_csv(path, encoding="utf-8")
     df = df.dropna(how='all')
     docs = df['text'].tolist()
     output_dir = "./output"

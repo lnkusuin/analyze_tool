@@ -106,6 +106,7 @@ class TwitterRepository:
                 sleep((60 * 15) + 30)
                 continue
 
+            # 最大一週間
             if max_id == ret[-1]["id_str"]:
                 break
 
@@ -114,6 +115,7 @@ class TwitterRepository:
             count = count + 1
 
             if count > max_count:
+                logger.info("{}に達しました。収集を終了します".format(max_count))
                 break
 
         return results
