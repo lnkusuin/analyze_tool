@@ -118,6 +118,59 @@ class TwitterRepository:
 
         return results
 
+    def get_tweets_by_word(self, next_results: str, **params):
+        while True:
+            try:
+                if next_results:
+                    res = self.session.get("https://api.twitter.com/1.1/search/tweets.json{}".format(next_results))
+                else:
+                    params = {
+                        **params,
+                        "count": 100,
+                        "lang": "ja",
+                        "locale": "ja",
+                        "result_type": "recent"
+                    }
+                    res = self.session.get(
+                        "https://api.twitter.com/1.1/search/tweets.json",
+                        params=params,
+                    )
+
+                return self._after_response(res)
+            except Exception as e:
+                logger.info("get_tweets_by_wordでコネクションエラー")
+                sleep(10)
+                self.session = self.get_session()
+
+    def get_all_tweets_by_word(self, max_count: int, **params):
+        count = 0
+        results = []
+        next_results = ""
+
+        while True:
+            logger.info("リクエスト{}回目".format(count + 1))
+            ret, status = self.get_tweets_by_word(next_results, **params)
+
+            statuses = ret['statuses']
+            search_metadata = ret['search_metadata']
+            next_results = search_metadata["next_results"]
+
+            if status == 429:
+                logger.info("API制限となりました。15分秒遅延します。")
+                sleep((60 * 15) + 30)
+                continue
+
+            if not len(statuses):
+                break
+
+            results.extend(statuses)
+            count = count + 1
+
+            if count > max_count:
+                break
+
+        return results
+
     def get_followers_user_ids(self, screen_name, next_cursor_str=-1):
         """
         対象screen_nameでのフォローワーのidリストを取得する
