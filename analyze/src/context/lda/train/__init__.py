@@ -5,6 +5,7 @@ import time
 import glob
 import pickle
 import math
+import functools
 from pathlib import Path
 from collections import defaultdict
 from multiprocessing import Value
@@ -26,7 +27,7 @@ import pyLDAvis
 import pyLDAvis.gensim
 
 from common import get_logger
-from nlp.stopword import stop_words
+from context.nlp.stopword import stop_words
 
 logger = get_logger(__name__)
 
@@ -46,12 +47,7 @@ def extract(_docs):
     return result
 
 
-def get_save_train_data_path(path):
-    base_path = Path(os.path.dirname(__file__))
-    return str(base_path / "t-{}".format(str(path)))
-
-
-def create_word_cloud(model, font_path):
+def create_word_cloud(model, font_path, learn_viz_dir_base):
     logger.info("ワードクラウドを作成します(トピック数:{})".format(model.num_topics))
     fig, axs = plt.subplots(ncols=2, nrows=math.ceil(model.num_topics/2), figsize=(10,40))
     axs = axs.flatten()
@@ -78,11 +74,11 @@ def create_word_cloud(model, font_path):
     # vis
     plt.tight_layout()
     # save as png
-    plt.savefig(get_save_train_data_path('wordcloud{}.png'.format(model.num_topics)))
+    plt.savefig(learn_viz_dir_base('wordcloud{}.png'.format(model.num_topics)))
     logger.info("ワードクラウドを作成しました。(トピック数: {})".format(model.num_topics))
 
 
-def create_viz(model, corpus, dictionary):
+def create_viz(model, corpus, dictionary, learn_viz_dir_base):
     # logger.info("LDAVizを作成します。")
     # vis_pcoa = pyLDAvis.gensim.prepare(model, corpus, dictionary, sort_topics=False)
     # pyLDAvis.save_html(vis_pcoa, get_path('pyldavis_output_pcoa.html'))
@@ -92,11 +88,11 @@ def create_viz(model, corpus, dictionary):
     logger.info("t-SNEを作成します。(トピック数:{})".format(model.num_topics))
     vis_tsne = pyLDAvis.gensim.prepare(model, corpus, dictionary, mds='tsne', sort_topics=False)
     # save as html
-    pyLDAvis.save_html(vis_tsne, get_save_train_data_path('pyldavis_output_tsne{}.html'.format(model.num_topics)))
+    pyLDAvis.save_html(vis_tsne, learn_viz_dir_base('pyldavis_output_tsne{}.html'.format(model.num_topics)))
     logger.info("t-SNEを作成します。(トピック数:{})".format(model.num_topics))
 
 
-def evaluation(n_topic, texts, corpus, dictionary, font_path):
+def evaluation(n_topic, texts, corpus, dictionary, font_path, learn_viz_dir_base):
 
     passes = 20
     iterations = 400
@@ -111,18 +107,18 @@ def evaluation(n_topic, texts, corpus, dictionary, font_path):
     )
     perplexity_vals = np.exp2(-model.log_perplexity(corpus))
 
-    create_word_cloud(model, font_path)
+    create_word_cloud(model, font_path, learn_viz_dir_base)
 
-    model.save(get_save_train_data_path("Model-{}".format(model.num_topics)))
+    model.save(learn_viz_dir_base("Model-{}".format(model.num_topics)))
 
     return model, n_topic, texts, corpus, dictionary, perplexity_vals
 
 
-def evaluation2(model, corpus, dictionary):
-    create_viz(model, corpus, dictionary)
+def evaluation2(model, corpus, dictionary, learn_viz_dir_base):
+    create_viz(model, corpus, dictionary, learn_viz_dir_base)
 
 
-def save_z(x_topics: list, perplexity_vals: list, coherence_vals: list):
+def save_z(x_topics: list, perplexity_vals: list, coherence_vals: list, learn_viz_dir_base):
     fig, ax1 = plt.subplots(figsize=(12, 5))
 
     c1 = 'darkturquoise'
@@ -139,19 +135,10 @@ def save_z(x_topics: list, perplexity_vals: list, coherence_vals: list):
 
     ax1.set_xticks(x_topics)
     fig.tight_layout()
-    plt.savefig(get_save_train_data_path('evaluation.png'))
-
-def test(lda_model, test_corpus):
-    import numpy as np
-
-    N = sum(count for doc in test_corpus for id, count in doc)
-    print("N: ", N)
-
-    perplexity = np.exp2(-lda_model.log_perplexity(test_corpus))
-    print("perplexity:", perplexity)
+    plt.savefig(learn_viz_dir_base('evaluation.png'))
 
 
-def run(path, font_path):
+def run(path, font_path, dir_base):
     """トピックモデルの構築・可視化・モデルの評価を行う"""
     start_time = time.perf_counter()
     dictionary = corpora.Dictionary([])
@@ -187,7 +174,9 @@ def run(path, font_path):
         for token in text:
             frequency[token] += 1
 
-    with open(get_save_train_data_path("TEXTS"), "wb") as f:
+    learn_viz_dir_base = functools.partial(dir_base, prefix="learn_viz")()
+
+    with open(learn_viz_dir_base("TEXTS"), "wb") as f:
         pickle.dump(texts, f)
 
     dictionary.filter_extremes(no_below=3, no_above=0.1)
@@ -200,9 +189,9 @@ def run(path, font_path):
     # corpus = tfidf[corpus]
 
     logger.info("コーパスの作成を完了しました。")
-    dictionary.save(get_save_train_data_path("DICTIONARY"))
-    dictionary.save_as_text(get_save_train_data_path("DICTIONARY.txt"))
-    corpora.MmCorpus.serialize(get_save_train_data_path("CORPUS_FILE_NAME"), corpus)
+    dictionary.save(learn_viz_dir_base("DICTIONARY"))
+    dictionary.save_as_text(learn_viz_dir_base("DICTIONARY.txt"))
+    corpora.MmCorpus.serialize(learn_viz_dir_base("CORPUS_FILE_NAME"), corpus)
 
     if len(texts):
         start = 2
@@ -217,14 +206,14 @@ def run(path, font_path):
         d2 = []
 
         for n_topic in range(start, limit, step):
-            model, n_topic, texts, corpus, dictionary, perplexity_vals = evaluation(n_topic, texts, corpus, dictionary, font_path)
+            model, n_topic, texts, corpus, dictionary, perplexity_vals = evaluation(n_topic, texts, corpus, dictionary, font_path, learn_viz_dir_base)
 
             coherence_model_lda = gensim.models.CoherenceModel(model=model, texts=texts, dictionary=dictionary, coherence='c_v')
             x_topics.append(n_topic)
             perplexity_vals_list.append(perplexity_vals)
             coherence_vals_list.append(coherence_model_lda.get_coherence())
 
-            save_z(x_topics, perplexity_vals_list, coherence_vals_list)
+            save_z(x_topics, perplexity_vals_list, coherence_vals_list, learn_viz_dir_base)
 
             d2.append(delayed(evaluation2)(model, corpus, dictionary))
 

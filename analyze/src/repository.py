@@ -22,8 +22,7 @@ class FileRepository:
         return path
 
     @classmethod
-    def save_json(cls, _dir, name, data):
-        path = cls.create_dir(_dir, name) / (name + ".json")
+    def save_json(cls, path, data):
         logger.info("{}にデータを書き込みます".format(path))
 
         with open(path, "w") as f:

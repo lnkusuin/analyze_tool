@@ -5,17 +5,16 @@ import pandas as pd
 from joblib import Parallel, delayed
 
 from common import get_logger
-from context.nlp.lda import load_state, get_path
+from context.lda.common import load_state
 
 logger = get_logger(__file__)
-get_path = functools.partial(get_path, __file__)
 
 
 def run(
-        texts_path=get_path("model/t-TEXTS"),
-        corpus_path=get_path("model/t-CORPUS_FILE_NAME"),
-        dictionary_path=get_path("model/t-DICTIONARY"),
-        model_path=get_path("model/t-Model-8"),
+        texts_path="",
+        corpus_path="",
+        dictionary_path="",
+        model_path="",
 ):
     texts, corpus, dictionary, model = load_state(
         text_path=texts_path,

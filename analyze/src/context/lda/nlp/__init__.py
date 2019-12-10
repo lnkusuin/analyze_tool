@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 
 def process_nlp(batch_id, texts, output_dir, size):
     start_time = time.perf_counter()
-    out_path = Path(os.path.dirname(__file__)) / output_dir / ("%d.json" % batch_id)
+    out_path = Path(output_dir) / ("%d.json" % batch_id)
     if out_path.exists():
         return None
 
@@ -42,7 +42,7 @@ def process_nlp(batch_id, texts, output_dir, size):
     logger.info("Saved {} texts to {}.txt = ファイル総数:{} 単一の処理時間: {}".format(len(texts), batch_id, size, time.perf_counter() - start_time))
 
 
-def run(path, n_jobs: int = 4, batch_size: int = 1000):
+def run(path, output_dir, n_jobs: int = 4, batch_size: int = 1000):
     """ 自然言語解析"""
     logger.info("====自然言語解析を行います。====")
     logger.info("辞書の作成を行います。")
@@ -56,20 +56,11 @@ def run(path, n_jobs: int = 4, batch_size: int = 1000):
     df = pd.read_csv(open(path, 'rU'), encoding="utf-8", engine="c")
     df = df.dropna(how='all')
     docs = df['text'].tolist()
-    output_dir = "./output"
-    p = Path(os.path.dirname(__file__)) / output_dir
-
-    # 解析結果格納フォルダは毎回初期化される仕様
-    if not p.exists():
-        p.mkdir()
-    else:
-        shutil.rmtree(p, ignore_errors=True)
-        p.mkdir()
 
     partitions = minibatch(docs, size=batch_size)
     executor = Parallel(n_jobs=n_jobs, verbose=10, backend="multiprocessing", prefer="processes")
     do = delayed(partial(process_nlp, size=len(docs)/batch_size))
-    tasks = (do(i, batch, output_dir) for i, batch in enumerate(partitions))
+    tasks = (do(i, batch, output_dir(prefix="nlp")()) for i, batch in enumerate(partitions))
     executor(tasks)
 
     logger.info("====自然言語解析が完了しました。。====")

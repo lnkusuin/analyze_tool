@@ -140,7 +140,7 @@ class TwitterRepository:
 
                 return self._after_response(res)
             except Exception as e:
-                logger.info("get_tweets_by_wordでコネクションエラー")
+                logger.info("get_tweets_by_wordでコネクションエラー", e)
                 sleep(10)
                 self.session = self.get_session()
 

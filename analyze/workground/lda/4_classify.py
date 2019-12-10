@@ -1,6 +1,5 @@
 import functools
 import os
-import pickle
 
 import pandas as pd
 
@@ -8,13 +7,16 @@ import setting
 
 from common import get_logger
 from context.lda.classify import run
-from context.nlp.lda import get_path
+from setting import get_save_local_path
+
 
 logger = get_logger(__file__)
-get_path = functools.partial(get_path, __file__)
 
 if __name__ == '__main__':
     results = []
+    classify_dir_base = functools.partial(get_save_local_path, prefix="classify")()
+
+
     g = run(
         texts_path=os.environ.get("CLASSIFY_TEXTS_PATH"),
         corpus_path=os.environ.get("CLASSIFY_CORPUS_PATH"),
@@ -26,10 +28,9 @@ if __name__ == '__main__':
 
     df = pd.DataFrame(results, columns=["トピックid", "確率", "確率(s)", "ワード"])
 
-    file_name = os.path.basename(os.environ.get("CLASSIFY_TEXTS_PATH")) + ".csv"
     df = df.query("確率 >= 0.6")
     df = df.sort_values(by="トピックid")
-    df.to_csv(file_name, index=False, encoding="utf_8_sig")
+    df.to_csv(classify_dir_base("classify_result.csv"), index=False, encoding="utf_8_sig")
 
     logger.info("既存テキストの振り分けを行いました。")
     #

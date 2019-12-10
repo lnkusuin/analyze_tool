@@ -32,7 +32,7 @@ def open_csv(path):
             yield text
 
 
-def run(path):
+def run(path, output_dir):
     """テキストデータの前処理"""
     logger.info("====テキストの前処理を開始します。====")
     count = 0
@@ -58,9 +58,9 @@ def run(path):
 
     logger.info("対象テキスト数: {}".format(len(texts)))
 
-    path = get_base_path("adjust.csv")
+    path = output_dir("prepare")("adjust.csv")
     pd.DataFrame(texts).to_csv(path, index=False, header=["text"], encoding="utf-8")
-    logger.info("解析結果を以下に保存しました。".format(path))
+    logger.info("解析結果を以下に保存しました。 {}".format(path))
 
     logger.info("====テキストの前処理を完了しました。====")
 
