@@ -1,25 +1,27 @@
-include ../../../Makefile
+include ../../Makefile
 
 include .env
 export
 
 run-all:
-	@make run-step1
-	@make run-step2
-	@make run-step3
-	@make run-step4
+	@make run-prepare
+	@make run-nlp
+	@make run-learn
 
-run-step1:
-	$(PIPENV_PIPFILE) pipenv run python . step1 --path $(STEP1_PATH) --type=json
+run-prepare:
+	$(PIP_RUN) prepare --path $(STEP1_PATH) --type=json
 
-run-step2:
-	$(PIPENV_PIPFILE) pipenv run python . step2 --path $(STEP2_PATH) --n_jobs $(STEP2_N_JOBS) --batch_size $(STEP2_BATCH_SIZE)
+run-nlp:
+	$(PIP_RUN) nlp --path $(STEP2_PATH) --n_jobs $(STEP2_N_JOBS) --batch_size $(STEP2_BATCH_SIZE)
 
-run-step3:
-	$(PIPENV_PIPFILE) OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES pipenv run python . step3 --path $(STEP3_PATH) --font_path $(FONT_PATH)
+run-learn:
+	$(PIP_RUN) learn --path $(STEP3_PATH) --font_path $(FONT_PATH)
 
 #run-step4:
 #	$(PIPENV_PIPFILE) pipenv run python . step4 --font_path $(STEP4_FONT_PATH)
 
-run-step5:
-	$(PIPENV_PIPFILE) pipenv run python . step5 --docs $(DOCS)
+run-classify:
+	$(PIP_RUN) classify
+
+run-relearn:
+	$(PIP_RUN) relearn --font_path $(FONT_PATH)

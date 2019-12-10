@@ -48,7 +48,7 @@ def extract(_docs):
 
 def get_save_train_data_path(path):
     base_path = Path(os.path.dirname(__file__))
-    return str(base_path / "t-{}".format(str(path)))
+    return str(base_path / "t-{}-{}".format('df2', str(path)))
 
 
 def create_word_cloud(model, font_path):
@@ -101,7 +101,7 @@ def evaluation(n_topic, texts, corpus, dictionary, font_path):
     passes = 20
     iterations = 400
 
-    model = gensim.models.ldamodel.LdaModel(
+    model = gensim.models.ldamulticore.LdaMulticore(
         corpus=corpus,
         id2word=dictionary,
         num_topics=n_topic,
@@ -151,35 +151,21 @@ def test(lda_model, test_corpus):
     print("perplexity:", perplexity)
 
 
-def run(path, font_path):
-    """トピックモデルの構築・可視化・モデルの評価を行う"""
+def run(font_path):
+    logger.info("再学習を行います。")
     start_time = time.perf_counter()
     dictionary = corpora.Dictionary([])
 
-    if not len(glob.glob(path)):
-        logger.error("指定のファイルパスではjson形式のファイルは見つかりませんでした。  {} \nパスを確認してください。".format(path))
-        sys.exit(1)
-
+    text_path = "/Users/yutakawakai/PhpstormProjects/my_rust_repo/analyze/workground/lda/df2_words"
     texts = []
-    for p in glob.glob(path):
-        logger.info("次のファイルから辞書を作成します。 {}".format(os.path.abspath(p)))
-        with open(os.path.abspath(p)) as f:
-            for line in f.readlines():
-                docs = json.loads(line.replace("\n", ""))
+    logger.info("辞書を作成します。")
+    with open(text_path, "rb") as f:
+        _texts = pickle.load(f)
+        for text in _texts:
+            new_dictionary = corpora.Dictionary([text])
+            dictionary.merge_with(new_dictionary)
+            texts.append(text)
 
-                # 名詞と動詞が各一つ以上入っているものに限定
-                words = extract(docs)
-                if not len(words):
-                    continue
-
-                nouns = [word for word in words if word not in stop_words]
-                # ゴミデータがあるので削除
-                nouns = [n for n in nouns if n != " " and n != "️"]
-
-                if len(nouns):
-                    new_dictionary = corpora.Dictionary([nouns])
-                    dictionary.merge_with(new_dictionary)
-                    texts.append(nouns)
     # setting frequency
     frequency = defaultdict(int)
 
@@ -187,9 +173,6 @@ def run(path, font_path):
     for text in texts:
         for token in text:
             frequency[token] += 1
-
-    with open(get_save_train_data_path("TEXTS"), "wb") as f:
-        pickle.dump(texts, f)
 
     dictionary.filter_extremes(no_below=3, no_above=0.1)
     logger.info("辞書の作成が完了しました。")
@@ -210,22 +193,16 @@ def run(path, font_path):
         limit = 30
         step = 2
 
-        executor = Parallel(n_jobs=-1, verbose=10, backend="multiprocessing", prefer="processes")
-
         # トピックごとにモデル算出(並列処理)
         logger.info("トピックモデルの構築とワードクラウドの作成を行います。")
-        d = []
-        for n_topic in range(start, limit, step):
-            d.append(delayed(evaluation)(n_topic, texts, corpus, dictionary, font_path))
-        logger.info("トピックモデルの構築とワードクラウドの作成を行いました。")
-
-        # トピックごとにcoherenceを算出(直列処理) 図の作成￿
-        logger.info("トピック毎にcoherenceを算出し、評価グラフとして保存します。")
         x_topics = []
         perplexity_vals_list = []
-        coherence_vals_list =[]
+        coherence_vals_list = []
         d2 = []
-        for model, n_topic, texts, corpus, dictionary, perplexity_vals in executor(d):
+
+        for n_topic in range(start, limit, step):
+            model, n_topic, texts, corpus, dictionary, perplexity_vals = evaluation(n_topic, texts, corpus, dictionary, font_path)
+
             coherence_model_lda = gensim.models.CoherenceModel(model=model, texts=texts, dictionary=dictionary, coherence='c_v')
             x_topics.append(n_topic)
             perplexity_vals_list.append(perplexity_vals)
@@ -234,9 +211,9 @@ def run(path, font_path):
             save_z(x_topics, perplexity_vals_list, coherence_vals_list)
 
             d2.append(delayed(evaluation2)(model, corpus, dictionary))
-        logger.info("トピック毎にcoherenceを算出し、評価グラフとして保存処理を完了します。")
 
         logger.info("t-sneを作成します。")
+        executor = Parallel(n_jobs=-1, verbose=10, backend="multiprocessing", prefer="processes")
         executor(d2)
         logger.info("t-sneを作成しました。")
 

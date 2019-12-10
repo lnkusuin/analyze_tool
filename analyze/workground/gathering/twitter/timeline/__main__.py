@@ -6,7 +6,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../../../src'))
 
 import fire
 
-from step1 import run as step1
+from prepare import run as step1
 
 fire.Fire()
 

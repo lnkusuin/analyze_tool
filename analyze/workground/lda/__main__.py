@@ -6,11 +6,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../src'))
 
 import fire
 
-from step1 import run as step1
-from step2 import run as step2
-from step3 import run as step3
-from step4 import run as step4
-from step5 import run as step5
+from prepare import run as prepare
+from nlp_ import run as nlp
+from learn import run as learn
+# from step4 import run as step4
+from classify import run as classify
+from relearn import run as relearn
+
 
 fire.Fire()
 
