@@ -11,7 +11,7 @@ from spacy.util import minibatch
 import pandas as pd
 
 from common import get_logger
-from nlp import nlp
+from context.nlp import nlp
 
 logger = get_logger(__name__)
 
@@ -24,8 +24,9 @@ def process_nlp(batch_id, texts, output_dir, size):
 
     logger.info("Processing batch {}".format(batch_id))
     with out_path.open("w", encoding="utf8") as f:
-        for doc in nlp().pipe(texts, disable=['ner']):
+        for doc in nlp().pipe(texts):
             words = [{
+                "raw_text": doc.text,
                 "text": token.text,
                 "lemma": token.lemma_,
                 "pos": token.pos_,
@@ -41,15 +42,18 @@ def process_nlp(batch_id, texts, output_dir, size):
     logger.info("Saved {} texts to {}.txt = ファイル総数:{} 単一の処理時間: {}".format(len(texts), batch_id, size, time.perf_counter() - start_time))
 
 
-def run(path, n_jobs=4, batch_size=1000):
+def run(path, n_jobs: int = 4, batch_size: int = 1000):
     """ 自然言語解析"""
+    logger.info("====自然言語解析を行います。====")
     logger.info("辞書の作成を行います。")
+    n_jobs = int(n_jobs)
+    batch_size = int(batch_size)
 
     if not Path(path).exists():
         logger.error("指定のパスが見つかりませんでした。 {}".format(path))
         sys.exit(1)
 
-    df = pd.read_csv(path, encoding="utf-8")
+    df = pd.read_csv(open(path, 'rU'), encoding="utf-8", engine="c")
     df = df.dropna(how='all')
     docs = df['text'].tolist()
     output_dir = "./output"
@@ -67,3 +71,5 @@ def run(path, n_jobs=4, batch_size=1000):
     do = delayed(partial(process_nlp, size=len(docs)/batch_size))
     tasks = (do(i, batch, output_dir) for i, batch in enumerate(partitions))
     executor(tasks)
+
+    logger.info("====自然言語解析が完了しました。。====")

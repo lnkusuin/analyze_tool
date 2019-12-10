@@ -167,7 +167,6 @@ def run(path, font_path):
             for line in f.readlines():
                 docs = json.loads(line.replace("\n", ""))
 
-                # 名詞と動詞が各一つ以上入っているものに限定
                 words = extract(docs)
                 if not len(words):
                     continue

@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 from common import get_logger
-from nlp import CleanText
+from context.nlp import CleanText
 
 
 logger = get_logger(__name__)
@@ -31,17 +31,20 @@ def open_csv(path):
             text = item.get("text", "")
             yield text
 
-def run(path, type="csv"):
+
+def run(path):
     """テキストデータの前処理"""
-    logger.info("テキストの前処理を開始します。")
+    logger.info("====テキストの前処理を開始します。====")
     count = 0
     texts = []
     _open = None
 
-    if type == "json":
+    root, ext = os.path.splitext(path)
+
+    if ext == ".json":
         _open = open_json
         logger.info("jsonファイルを読み込みます。")
-    elif type == "csv":
+    elif ext == ".csv":
         _open = open_csv
         logger.info("CSVファイルを読み込みます。")
 
@@ -53,11 +56,12 @@ def run(path, type="csv"):
         if count % 10000 == 0:
             logger.info(count)
 
-    print(len(texts))
+    logger.info("対象テキスト数: {}".format(len(texts)))
 
     path = get_base_path("adjust.csv")
     pd.DataFrame(texts).to_csv(path, index=False, header=["text"], encoding="utf-8")
+    logger.info("解析結果を以下に保存しました。".format(path))
 
-    logger.info("テキストの前処理を完了しました。")
+    logger.info("====テキストの前処理を完了しました。====")
 
     return path

@@ -5,7 +5,7 @@ import pandas as pd
 from joblib import Parallel, delayed
 
 from common import get_logger
-from nlp.lda import load_state, get_path
+from context.nlp.lda import load_state, get_path
 
 logger = get_logger(__file__)
 get_path = functools.partial(get_path, __file__)
@@ -17,74 +17,33 @@ def run(
         dictionary_path=get_path("model/t-DICTIONARY"),
         model_path=get_path("model/t-Model-8"),
 ):
-    # texts, corpus, dictionary, model = load_state(
-    #     text_path=texts_path,
-    #     corpus_path=corpus_path,
-    #     dictionary_path=dictionary_path,
-    #     model_path=model_path
-    # )
-    #
-    # logger.info("既存テキストの振り分けを行います。")
-    #
-    # topic_id_to_str = {
-    #     "1": "ファミマ・アメブロキャンペーン",
-    #     "2": "不明1",
-    #     "3": "不明2",
-    #     "4": "マンガ・雑誌・ガチャ系キャンペーン",
-    #     "5": "質問箱系",
-    #     "6": "ツイートフォロー(投票系)",
-    #     "7": "本田コーラジャパン系",
-    #     "8": "ツイートフォロー(応募系)",
-    # }
-    #
-    # results = []
-    #
-    # for words in texts:
-    #     other_corpus = [dictionary.doc2bow(text) for text in [words]]
-    #     unseen_doc = other_corpus[0]
-    #     vector = model[unseen_doc]
-    #
-    #     vector = sorted(vector, key=lambda x: x[1], reverse=True)
-    #
-    #     topic_id = vector[0][0] + 1
-    #     ratio = vector[0][1]
-    #     ratio_str = str("{:.2f}%").format(ratio * 100)
-    #
-    #     results.append([topic_id_to_str.get(str(topic_id)), ratio, ratio_str, " ".join(words)])
-    #
-    #     if len(results) % 1000 == 0:
-    #         print(len(results))
-    #
-    # df = pd.DataFrame(results, columns=["トピック名", "確率", "確率(s)", "ワード"])
-    #
-    # # print(df.value_counts(normalize=True))
-    # df.to_csv("aaa.csv")
-    #
-    # logger.info("既存テキストの振り分けを行いました。")
+    texts, corpus, dictionary, model = load_state(
+        text_path=texts_path,
+        corpus_path=corpus_path,
+        dictionary_path=dictionary_path,
+        model_path=model_path
+    )
 
-    df = pd.read_csv("aaa.csv")
+    logger.info("既存テキストの振り分けを行います。")
 
-    df.to_csv("aaa_2.csv")
+    count = 0
+    for words in texts:
+        other_corpus = [dictionary.doc2bow(text) for text in [words]]
+        unseen_doc = other_corpus[0]
+        vector = model[unseen_doc]
 
-    # テキスト1
-    df1 = df.query("~(トピック名=='不明1')")
-    df1 = df1.query("~(トピック名=='不明2')")
-    df1 = df1.query("確率 >= 0.6")
-    df1_words = df1["ワード"].values.tolist()
-    df1_words = list(map(lambda x: x.split(" "), df1_words))
-    with open("df1_words", "wb") as f:
-        pickle.dump(df1_words, f)
+        vector = sorted(vector, key=lambda x: x[1], reverse=True)
 
-    df1.to_csv("df1.csv")
+        topic_id = vector[0][0] + 1
+        ratio = vector[0][1]
+        ratio_str = str("{:.2f}%").format(ratio * 100)
 
-    # テキスト2
-    df2 = df.query("トピック名=='不明1' | トピック名=='不明2'")
-    df2_words = df2["ワード"].values.tolist()
-    df2_words = list(map(lambda x: x.split(" "), df2_words))
-    with open("df2_words", "wb") as f:
-        pickle.dump(df2_words, f)
+        if count % 1000 == 0:
+            print(count)
 
-    df2.to_csv("df2.csv")
+        count += 1
+
+        yield texts, corpus, dictionary, model, words, topic_id, ratio, ratio_str
 
 # def run(docs,
 #         texts_path="../step3/t-TEXTS",
