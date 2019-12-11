@@ -196,7 +196,7 @@ def run(path, font_path, dir_base):
 
     if len(texts):
         start = 2
-        limit = 30
+        limit = 32
         step = 2
 
         # トピックごとにモデル算出(並列処理)
