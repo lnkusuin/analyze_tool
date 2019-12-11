@@ -16,7 +16,7 @@ def run(
         dictionary_path="",
         model_path="",
 ):
-    texts, corpus, dictionary, model = load_state(
+    texts_g, corpus, dictionary, model = load_state(
         text_path=texts_path,
         corpus_path=corpus_path,
         dictionary_path=dictionary_path,
@@ -26,7 +26,7 @@ def run(
     logger.info("既存テキストの振り分けを行います。")
 
     count = 0
-    for text in texts:
+    for text in texts_g():
         # other_corpus = [dictionary.doc2bow([text["lemma"] for text in text["words"]])]
         # print(other_corpus)
         other_corpus = [dictionary.doc2bow(text) for text in [text["nouns"]]]

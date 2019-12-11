@@ -1,4 +1,4 @@
-import pickle
+import json
 
 import gensim
 from gensim.corpora.mmcorpus import MmCorpus
@@ -14,8 +14,10 @@ def load_state(text_path, corpus_path, dictionary_path, model_path):
     """状態の復元"""
 
     logger.info("テキストを読み込みます")
-    with open(text_path, "rb") as f:
-        texts = pickle.load(f)
+    def text_g():
+        with open(text_path, "r") as f:
+            for line in f.readlines():
+                yield json.loads(line.replace("\n", ""))
 
     logger.info("テキストの読み込みが完了しました。")
 
@@ -33,4 +35,4 @@ def load_state(text_path, corpus_path, dictionary_path, model_path):
     model = gensim.models.ldamodel.LdaModel.load(model_path)
     logger.info("LDAの読み込みが完了しました。")
 
-    return texts, corpus, dictionary, model
+    return text_g, corpus, dictionary, model
