@@ -16,17 +16,23 @@ if __name__ == '__main__':
     results = []
     classify_dir_base = functools.partial(get_save_local_path, prefix="classify")()
 
-
     g = run(
         texts_path=os.environ.get("CLASSIFY_TEXTS_PATH"),
         corpus_path=os.environ.get("CLASSIFY_CORPUS_PATH"),
         dictionary_path=os.environ.get("CLASSIFY_DICTIONARY_PATH"),
         model_path=os.environ.get("CLASSIFY_MODEL_PATH"),
     )
-    for texts, corpus, dictionary, model, words, topic_id, ratio, ratio_str in g:
-        results.append([topic_id, ratio, ratio_str, " ".join(words)])
+    for corpus, dictionary, model, text in g:
+        results.append([
+            text["topic_id"],
+            text["ratio"],
+            text["ratio_str"],
+            " ".join(text["hash_tags"]),
+            " ".join(text["words"]),
+            text["text"]
+        ])
 
-    df = pd.DataFrame(results, columns=["トピックid", "確率", "確率(s)", "ワード"])
+    df = pd.DataFrame(results, columns=["トピックid", "確率", "確率(s)", "ハッシュタグ", "ワード", "元テキスト", ])
 
     df = df.query("確率 >= 0.6")
     df = df.sort_values(by="トピックid")

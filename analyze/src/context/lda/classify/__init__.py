@@ -26,8 +26,10 @@ def run(
     logger.info("既存テキストの振り分けを行います。")
 
     count = 0
-    for words in texts:
-        other_corpus = [dictionary.doc2bow(text) for text in [words]]
+    for text in texts:
+        # other_corpus = [dictionary.doc2bow([text["lemma"] for text in text["words"]])]
+        # print(other_corpus)
+        other_corpus = [dictionary.doc2bow(text) for text in [text["nouns"]]]
         unseen_doc = other_corpus[0]
         vector = model[unseen_doc]
 
@@ -42,7 +44,16 @@ def run(
 
         count += 1
 
-        yield texts, corpus, dictionary, model, words, topic_id, ratio, ratio_str
+        data = {
+            "words": text["nouns"],
+            "topic_id": topic_id,
+            "ratio": ratio,
+            "ratio_str": ratio_str,
+            "hash_tags": text["hash_tags"],
+            "text": text["text"]
+        }
+
+        yield corpus, dictionary, model, data
 
 # def run(docs,
 #         texts_path="../step3/t-TEXTS",
