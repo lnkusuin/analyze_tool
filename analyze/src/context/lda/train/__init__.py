@@ -151,28 +151,28 @@ def run(path, font_path, dir_base):
     texts = []
     for (i, p) in enumerate(glob.glob(path)):
         logger.info("{} 次のファイルから辞書を作成します。 {}".format(i, os.path.abspath(p)))
-        with open(os.path.abspath(p)) as f:
-            for line in f.readlines():
-                doc = json.loads(line.replace("\n", ""))
+        with open(train_viz_dir_base("TEXTS.json"), "w", encoding="utf8") as rf:
+            with open(os.path.abspath(p)) as f:
+                for line in f.readlines():
+                    doc = json.loads(line.replace("\n", ""))
 
-                words = extract(doc["words"])
-                if not len(words):
-                    continue
+                    words = extract(doc["words"])
+                    if not len(words):
+                        continue
 
-                nouns = [word for word in words if word not in stop_words]
-                # ゴミデータがあるので削除
-                nouns = [n for n in nouns if n != " " and n != "️"]
+                    nouns = [word for word in words if word not in stop_words]
+                    # ゴミデータがあるので削除
+                    nouns = [n for n in nouns if n != " " and n != "️"]
 
-                if len(nouns):
-                    new_dictionary = corpora.Dictionary([nouns])
-                    dictionary.merge_with(new_dictionary)
-                    doc["nouns"] = nouns
+                    if len(nouns):
+                        new_dictionary = corpora.Dictionary([nouns])
+                        dictionary.merge_with(new_dictionary)
+                        doc["nouns"] = nouns
 
-                    with open(train_viz_dir_base("TEXTS.json"), "a", encoding="utf8") as rf:
                         rf.write(json.dumps(doc, ensure_ascii=False))
                         rf.write("\n")
 
-                    texts.append(nouns)
+                        texts.append(nouns)
 
     dictionary.filter_extremes(no_below=3, no_above=0.1)
     logger.info("辞書の作成が完了しました。")
