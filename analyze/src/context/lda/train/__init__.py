@@ -142,14 +142,15 @@ def run(path, font_path, dir_base):
     """トピックモデルの構築・可視化・モデルの評価を行う"""
     start_time = time.perf_counter()
     dictionary = corpora.Dictionary([])
+    train_viz_dir_base = functools.partial(dir_base, prefix="train_viz")()
 
     if not len(glob.glob(path)):
         logger.error("指定のファイルパスではjson形式のファイルは見つかりませんでした。  {} \nパスを確認してください。".format(path))
         sys.exit(1)
 
     texts = []
-    for p in glob.glob(path):
-        logger.info("次のファイルから辞書を作成します。 {}".format(os.path.abspath(p)))
+    for (i, p) in enumerate(glob.glob(path)):
+        logger.info("{} 次のファイルから辞書を作成します。 {}".format(i, os.path.abspath(p)))
         with open(os.path.abspath(p)) as f:
             for line in f.readlines():
                 doc = json.loads(line.replace("\n", ""))
@@ -166,21 +167,13 @@ def run(path, font_path, dir_base):
                     new_dictionary = corpora.Dictionary([nouns])
                     dictionary.merge_with(new_dictionary)
                     doc["nouns"] = nouns
-                    texts.append(doc)
-    # setting frequency
-    # frequency = defaultdict(int)
 
-    # count the number of occurrences of the word
-    # for text in texts:
-    #     for token in text["nouns"]:
-    #         frequency[token] += 1
+                    with open(train_viz_dir_base("TEXTS.json"), "a", encoding="utf8") as rf:
+                        rf.write(json.dumps(doc, ensure_ascii=False))
+                        rf.write("\n")
 
-    train_viz_dir_base = functools.partial(dir_base, prefix="train_viz")()
+                    texts.append(nouns)
 
-    with open(train_viz_dir_base("TEXTS"), "wb") as f:
-        pickle.dump(texts, f)
-
-    texts = [t["nouns"] for t in texts]
     dictionary.filter_extremes(no_below=3, no_above=0.1)
     logger.info("辞書の作成が完了しました。")
 
