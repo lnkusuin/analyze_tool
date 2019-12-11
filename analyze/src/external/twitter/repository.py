@@ -159,11 +159,11 @@ class TwitterRepository:
                 continue
 
             statuses = ret['statuses']
-            search_metadata = ret['search_metadata']
-            next_results = search_metadata["next_results"]
-
             if not len(statuses):
                 break
+
+            search_metadata = ret['search_metadata']
+            next_results = search_metadata["next_results"]
 
             results.extend(statuses)
             count = count + 1

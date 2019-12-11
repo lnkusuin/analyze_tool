@@ -18,7 +18,7 @@ if __name__ == '__main__':
     logger.info("{}のワードを検索します。 ".format(word))
     print(word)
     twitter_repository = TwitterRepository()
-    tweets = twitter_repository.get_all_tweets_by_word(2, **{
+    tweets = twitter_repository.get_all_tweets_by_word(100, **{
         "q": word
     })
 
