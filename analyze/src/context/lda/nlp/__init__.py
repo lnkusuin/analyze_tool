@@ -73,7 +73,7 @@ def run(path, output_dir, n_jobs: int = 4, batch_size: int = 1000):
 
     df = pd.read_csv(open(path, 'rU'), encoding="utf-8", engine="c")
     df = df.dropna(how='all')
-    docs = df['text'].tolist()
+    docs = df['text'].drop_duplicates().tolist()
     output_dir = output_dir(prefix="nlp")()
 
     partitions = minibatch(docs, size=batch_size)
