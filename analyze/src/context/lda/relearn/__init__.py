@@ -40,7 +40,8 @@ def extract(_docs):
                 _doc["tag"] == "名詞-固有名詞-一般" or \
                 _doc["tag"] == "名詞-固有名詞-地名-国" or \
                 _doc["tag"] == "形容詞-一般" or \
-                _doc["pos"] == "VERB":
+                _doc["tag"] == "感動詞-一般" or \
+                (_doc["pos"] == "VERB" and _doc["tag"] == "動詞-非自立可能"):
 
             result.append(_doc.get("lemma", ""))
     return result
