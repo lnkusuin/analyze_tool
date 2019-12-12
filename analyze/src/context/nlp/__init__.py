@@ -53,7 +53,7 @@ class CleanText:
 
     def to_remove_symbol(self):
         self._text = re.sub(REMOVE_SYMBOL_H, " ", self._text)
-        self._text = self._text.replace("RT ", " ").replace("rt ", " ").replace(":", " ")
+        self._text = self._text.replace("RT ", " ").replace("rt ", " ").replace(":", " ").replace("…", " ")
         # self._text = re.sub(REMOVE_SYMBOL_Z, "", self._text)
 
         return self

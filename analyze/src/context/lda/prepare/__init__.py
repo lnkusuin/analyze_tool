@@ -21,15 +21,13 @@ def open_json(path):
     with open(path) as f:
         items = json.load(f)
         for item in items:
-            # リツイート以外
-            yield item.get("text", "")
+            yield item.get("id_str", ""), item.get("text", "")
 
 def open_csv(path):
     with open(path) as f:
         reader = csv.DictReader(f)
         for item in reader:
-            text = item.get("text", "")
-            yield text
+            yield item.get("id_str", ""), item.get("text", "")
 
 
 def run(path, output_dir):
@@ -49,8 +47,11 @@ def run(path, output_dir):
         logger.info("CSVファイルを読み込みます。")
 
     # リツイートが省かれている
-    for text in _open(path):
-        texts.append(CleanText(text).to_lower().to_adjust_line_code().to_remove_url().to_adjust_zero_number().to_adjust_mention().to_remove_symbol().text)
+    for id_str, text in _open(path):
+        texts.append([
+            id_str,
+            CleanText(text).to_lower().to_adjust_line_code().to_remove_url().to_adjust_zero_number().to_adjust_mention().to_remove_symbol().text
+        ])
         count += 1
 
         if count % 10000 == 0:
@@ -59,7 +60,9 @@ def run(path, output_dir):
     logger.info("対象テキスト数: {}".format(len(texts)))
 
     path = output_dir("prepare")("adjust.csv")
-    pd.DataFrame(texts).to_csv(path, index=False, header=["text"], encoding="utf-8")
+    df = pd.DataFrame(texts, columns=["id_str", "text"])
+    df = df.drop_duplicates(subset="id_str")["text"].drop_duplicates()
+    df.to_csv(path, index=False, header=["text"], encoding="utf-8")
     logger.info("解析結果を以下に保存しました。 {}".format(path))
 
     logger.info("====テキストの前処理を完了しました。====")
