@@ -151,7 +151,7 @@ def run(path, font_path, dir_base):
     texts = []
     for (i, p) in enumerate(glob.glob(path)):
         logger.info("{} 次のファイルから辞書を作成します。 {}".format(i, os.path.abspath(p)))
-        with open(train_viz_dir_base("TEXTS.json"), "w", encoding="utf8") as rf:
+        with open(train_viz_dir_base("TEXTS.json"), "a", encoding="utf8") as rf:
             with open(os.path.abspath(p)) as f:
                 for line in f.readlines():
                     doc = json.loads(line.replace("\n", ""))
