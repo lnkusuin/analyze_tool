@@ -222,3 +222,98 @@ def run(path, font_path, dir_base):
 
     logger.info("処理時間: {}".format(time.perf_counter()-start_time))
 
+
+def hdp_run(path):
+    """HDP トピックモデルの構築・可視化・モデルの評価を行う"""
+    start_time = time.perf_counter()
+    dictionary = corpora.Dictionary([])
+
+    if not len(glob.glob(path)):
+        logger.error("指定のファイルパスではjson形式のファイルは見つかりませんでした。  {} \nパスを確認してください。".format(path))
+        sys.exit(1)
+
+    texts = []
+    with open(path) as f:
+        for (i, line) in enumerate(f):
+            doc = json.loads(line.replace("\n", ""))
+
+            new_dictionary = corpora.Dictionary([doc["nouns"]])
+            dictionary.merge_with(new_dictionary)
+
+            texts.append(doc["nouns"])
+
+            if i % 1000 == 0:
+                print(i)
+
+    dictionary.filter_extremes(no_below=3, no_above=0.1)
+    logger.info("辞書の作成が完了しました。")
+
+    logger.info("コーパスの作成を開始します。")
+    corpus = [dictionary.doc2bow(t) for t in texts]
+
+    # トピックごとにモデル算出(並列処理)
+    logger.info("トピックモデルの構築とワードクラウドの作成を行います。")
+    #HDPモデルの推定
+    model = gensim.models.hdpmodel.HdpModel(
+        corpus=corpus,
+        id2word=dictionary,
+        alpha=0.1
+    )
+
+    results = []
+    with open(path) as f:
+        for (i, line) in enumerate(f):
+            doc = json.loads(line.replace("\n", ""))
+            corpus = [dictionary.doc2bow(t) for t in [doc["nouns"]]]
+            unseen_doc = corpus[0]
+            vector = model[unseen_doc]
+
+            vector = sorted(vector, key=lambda x: x[1], reverse=True)
+
+            topic_id = "?"
+            ratio = 0
+            ratio_str = "0"
+
+            if len(vector):
+                topic_id = vector[0][0] + 1
+                ratio = vector[0][1]
+                ratio_str = str("{:.2f}%").format(ratio * 100)
+
+            # 16:21 スタート
+            results.append([
+                topic_id,
+                ratio,
+                ratio_str,
+                " ".join(doc["hash_tags"]),
+                " ".join(doc["nouns"]),
+                doc["text"]
+            ])
+
+    df = pd.DataFrame(results, columns=["トピックid", "確率", "確率(s)", "ハッシュタグ", "ワード", "元テキスト", ])
+
+    df = df.query("確率 >= 0.6")
+    df = df.sort_values(by="トピックid")
+    df.to_csv("classify_result.csv", index=False, encoding="utf_8_sig")
+
+        # #各文書のトピックの重みを保存
+        # topics = [model[c] for c in corpus]
+        # print(topics[0])
+        #
+        # #各トピックごとの単語の抽出（topicsの引数を-1にすることで、ありったけのトピックを結果として返してくれます。）
+        # # model.print_topics(num_topics=-1)
+        #
+        # #文書ごとに割り当てられたトピックの確率をCSVで出力
+        # mixture = [dict(model[x]) for x in corpus]
+        # pd.DataFrame(mixture).to_csv("topic_for_corpus.csv")
+        #
+        # #トピックごとの上位10語をCSVで出力
+        # topicdata =model.print_topics(num_topics=200)
+        # pd.DataFrame(topicdata).to_csv("topic_detail.csv")
+
+        # 時間がかかる
+        # logger.info("t-sneを作成します。")
+        # executor = Parallel(n_jobs=-1, verbose=10, backend="multiprocessing", prefer="processes")
+        # executor(d2)
+        # logger.info("t-sneを作成しました。")e
+
+    logger.info("処理時間: {}".format(time.perf_counter()-start_time))
