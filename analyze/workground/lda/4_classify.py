@@ -68,19 +68,21 @@ if __name__ == '__main__':
         for l in Counter(_c).most_common(3):
             label += " #{} ".format(l[0])
 
-        im = WordCloud(
-            font_path='/System/Library/Fonts/ヒラギノ明朝 ProN.ttc',
-            background_color='black',
-            color_func=color_func,
-            width=700, height=300,
-            random_state=0,
-            scale=2
-        ).generate(" ".join([item[4] for item in filterd_item]))
+        words = " ".join([item[4] for item in filterd_item])
+        if len(words):
+            im = WordCloud(
+                font_path='/System/Library/Fonts/ヒラギノ明朝 ProN.ttc',
+                background_color='black',
+                color_func=color_func,
+                width=700, height=300,
+                random_state=0,
+                scale=2
+            ).generate(" ".join([item[4] for item in filterd_item]))
 
-        print(label)
-        axs[i].imshow(im.recolor(colormap='Paired_r', random_state=244), alpha=0.98)
-        axs[i].axis('off')
-        axs[i].set_title(label, fontsize=10)
+            print(label)
+            axs[i].imshow(im.recolor(colormap='Paired_r', random_state=244), alpha=0.98)
+            axs[i].axis('off')
+            axs[i].set_title(label, fontsize=10)
 
     # vis
     plt.tight_layout()
