@@ -1,8 +1,9 @@
+from external.socialbakers.model import MONTHLY_LIST
+from external.socialbakers.service import SocialBakersService
+
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
-from external.socialbakers.model import MONTHLY_LIST
-from external.socialbakers.service import SocialBakersService
 
 if __name__ == '__main__':
     out_dir = "./"
