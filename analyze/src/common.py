@@ -1,7 +1,8 @@
 import logging
 
 log_path = "/tmp/analyzed_app.log"
-print("see log {}".format(log_path))
+print("see log")
+print("tail -f {}".format(log_path))
 
 
 def get_logger(name):

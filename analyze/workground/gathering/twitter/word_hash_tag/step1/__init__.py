@@ -1,11 +1,12 @@
 from pathlib import Path
 import os
 
+import setting
+
 from common import get_logger
 from repository import FileRepository
 from external.twitter.repository import TwitterRepository
 
-import setting
 
 logger = get_logger(__file__)
 
@@ -26,6 +27,6 @@ if __name__ == '__main__':
     })
 
     word = word.replace("#", 'hash_')
-    FileRepository.save_json(get_path(), str(word), tweets)
+    FileRepository.save_json(str(word) +'.json', tweets)
     logger.info("{}のワードを検索しました。 件数{}件".format(word, len(tweets)))
 

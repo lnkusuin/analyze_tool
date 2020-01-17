@@ -50,6 +50,7 @@ wordcloud = "*"
 pyldavis = "*"
 tableauserverclient = "*"
 tqdm = "*"
+asari = "*"
 
 [requires]
 python_version = "3.7"
